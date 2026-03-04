@@ -19,7 +19,7 @@ class GastosViewModel(application: Application) : AndroidViewModel(application) 
 
     fun agregarGasto(concepto: String, monto: Double, fecha: Long, categoria: String) {
         viewModelScope.launch {
-            repository.insertarGasto(Gasto(concepto = concepto, monto = monto, fecha = fecha, categoria = categoria))
+            repository.insertarGasto(Gasto(concepto = concepto, cantidad = monto, fecha = fecha, categoria = categoria))
         }
     }
 

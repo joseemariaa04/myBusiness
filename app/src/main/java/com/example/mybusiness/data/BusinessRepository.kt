@@ -12,6 +12,7 @@ class BusinessRepository private constructor(context: Context) {
     private val gastoDao = database.gastoDao()
     private val ingresoDao = database.ingresoDao()
     private val historialMesDao = database.historialMesDao()
+    private val categoriaDao = database.categoriaDao()
 
     // Trabajadores
     val todosLosTrabajadores: Flow<List<Trabajador>> = trabajadorDao.obtenerTodos()
@@ -36,9 +37,13 @@ class BusinessRepository private constructor(context: Context) {
     // Historial
     val todoElHistorial: Flow<List<HistorialMes>> = historialMesDao.obtenerTodoElHistorial()
 
+    // Categorías
+    val todasLasCategorias: Flow<List<Categoria>> = categoriaDao.obtenerTodas()
+    suspend fun insertarCategoria(categoria: Categoria) = categoriaDao.insertar(categoria)
+    suspend fun eliminarCategoria(categoria: Categoria) = categoriaDao.eliminar(categoria)
+
     suspend fun iniciarNuevoMes(nombre: String, ingresos: Double, gastos: Double) {
         database.withTransaction {
-            // 1. Guardar en el historial
             val historial = HistorialMes(
                 nombreMes = nombre,
                 ingresosTotales = ingresos,
@@ -48,7 +53,6 @@ class BusinessRepository private constructor(context: Context) {
             )
             historialMesDao.insertar(historial)
 
-            // 2. Limpiar todos los datos actuales (Reset app)
             database.openHelper.writableDatabase.execSQL("DELETE FROM trabajadores")
             database.openHelper.writableDatabase.execSQL("DELETE FROM clientes")
             database.openHelper.writableDatabase.execSQL("DELETE FROM gastos")

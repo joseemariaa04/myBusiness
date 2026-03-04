@@ -4,15 +4,12 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.LocalGasStation
-import androidx.compose.material.icons.filled.Tv
-import androidx.compose.material.icons.filled.MoneyOff
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,15 +20,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mybusiness.data.Gasto
 import com.example.mybusiness.ui.AnimacionEntradaLista
 import com.example.mybusiness.ui.EstadoVacio
+import com.example.mybusiness.ui.categorias.CategoriasViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun GastosScreen(viewModel: GastosViewModel) {
     val gastos by viewModel.gastos.collectAsState()
+    val catViewModel: CategoriasViewModel = viewModel()
+    val categorias by catViewModel.categorias.collectAsState()
+    
     var mostrarDialogo by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -83,7 +85,9 @@ fun GastosScreen(viewModel: GastosViewModel) {
         }
 
         if (mostrarDialogo) {
+            val gastosCategorias = categorias.filter { !it.esIngreso }
             AgregarGastoDialog(
+                categoriasDisponibles = if (gastosCategorias.isEmpty()) listOf("Varios") else gastosCategorias.map { it.nombre },
                 onDismiss = { mostrarDialogo = false },
                 onConfirm = { concepto, monto, categoria ->
                     viewModel.agregarGasto(concepto, monto, System.currentTimeMillis(), categoria)
@@ -96,19 +100,18 @@ fun GastosScreen(viewModel: GastosViewModel) {
 
 @Composable
 fun GastoCard(gasto: Gasto, onDelete: () -> Unit) {
-    val icono = when (gasto.categoria) {
-        "Comida" -> Icons.Default.Restaurant
-        "Transporte" -> Icons.Default.LocalGasStation
-        "Entretenimiento" -> Icons.Default.Tv
-        else -> Icons.Default.Restaurant
-    }
-    
-    val colorIcono = when (gasto.categoria) {
-        "Comida" -> Color(0xFFFB8C00)
-        "Transporte" -> Color(0xFF1E88E5)
-        "Entretenimiento" -> Color(0xFF8E24AA)
-        else -> Color.Gray
-    }
+    // Mapa de iconos básico
+    val iconosTemplate = mapOf(
+        "Sell" to Icons.Default.Sell,
+        "Build" to Icons.Default.Build,
+        "Restaurant" to Icons.Default.Restaurant,
+        "LocalGasStation" to Icons.Default.LocalGasStation,
+        "Tv" to Icons.Default.Tv,
+        "Work" to Icons.Default.Work,
+        "ShoppingBag" to Icons.Default.ShoppingBag,
+        "Payments" to Icons.Default.Payments,
+        "Home" to Icons.Default.Home
+    )
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -123,10 +126,10 @@ fun GastoCard(gasto: Gasto, onDelete: () -> Unit) {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(colorIcono.copy(alpha = 0.2f)),
+                    .background(Color(0xFFFF5252).copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(imageVector = icono, contentDescription = null, tint = colorIcono)
+                Icon(Icons.Default.ArrowDownward, contentDescription = null, tint = Color(0xFFFF5252))
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -144,7 +147,7 @@ fun GastoCard(gasto: Gasto, onDelete: () -> Unit) {
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "-€${String.format(Locale.getDefault(), "%,.2f", gasto.monto)}",
+                    text = "-€${String.format(Locale.getDefault(), "%,.2f", gasto.cantidad)}",
                     color = Color(0xFFFF5252),
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -163,10 +166,14 @@ fun GastoCard(gasto: Gasto, onDelete: () -> Unit) {
 }
 
 @Composable
-fun AgregarGastoDialog(onDismiss: () -> Unit, onConfirm: (String, Double, String) -> Unit) {
+fun AgregarGastoDialog(
+    categoriasDisponibles: List<String>,
+    onDismiss: () -> Unit, 
+    onConfirm: (String, Double, String) -> Unit
+) {
     var concepto by remember { mutableStateOf("") }
-    var montoStr by remember { mutableStateOf("") }
-    var categoria by remember { mutableStateOf("Comida") }
+    var cantidadStr by remember { mutableStateOf("") }
+    var categoriaSeleccionada by remember { mutableStateOf(categoriasDisponibles.first()) }
     val contexto = LocalContext.current
 
     AlertDialog(
@@ -175,30 +182,29 @@ fun AgregarGastoDialog(onDismiss: () -> Unit, onConfirm: (String, Double, String
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextField(value = concepto, onValueChange = { concepto = it }, label = { Text("Concepto") })
-                TextField(value = montoStr, onValueChange = { montoStr = it }, label = { Text("Monto") })
-                Text("Categoría:")
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = categoria == "Comida", onClick = { categoria = "Comida" })
-                    Text("Comida")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    RadioButton(selected = categoria == "Transporte", onClick = { categoria = "Transporte" })
-                    Text("Transporte")
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = categoria == "Entretenimiento", onClick = { categoria = "Entretenimiento" })
-                    Text("Entretenimiento")
+                TextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text("Monto") })
+                
+                Text("Selecciona Categoría:", fontWeight = FontWeight.Bold)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(categoriasDisponibles) { cat ->
+                        FilterChip(
+                            selected = categoriaSeleccionada == cat,
+                            onClick = { categoriaSeleccionada = cat },
+                            label = { Text(cat) }
+                        )
+                    }
                 }
             }
         },
         confirmButton = {
             Button(onClick = { 
-                val monto = montoStr.toDoubleOrNull()
-                if (concepto.isBlank() || montoStr.isBlank()) {
+                val cantidad = cantidadStr.toDoubleOrNull()
+                if (concepto.isBlank() || cantidadStr.isBlank()) {
                     Toast.makeText(contexto, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
-                } else if (monto == null) {
+                } else if (cantidad == null) {
                     Toast.makeText(contexto, "El monto debe ser un número válido", Toast.LENGTH_SHORT).show()
                 } else {
-                    onConfirm(concepto, monto, categoria)
+                    onConfirm(concepto, cantidad, categoriaSeleccionada)
                 }
             }) {
                 Text("Agregar")

@@ -27,8 +27,8 @@ class InicioViewModel(application: Application) : AndroidViewModel(application) 
         repository.todosLosGastos,
         repository.todoElHistorial
     ) { ingresos, gastos, historial ->
-        val totalIngresos = ingresos.sumOf { it.monto }
-        val totalGastos = gastos.sumOf { it.monto }
+        val totalIngresos = ingresos.sumOf { it.cantidad }
+        val totalGastos = gastos.sumOf { it.cantidad }
         InicioUiState(
             beneficioMensual = totalIngresos - totalGastos,
             ingresosTotales = totalIngresos,

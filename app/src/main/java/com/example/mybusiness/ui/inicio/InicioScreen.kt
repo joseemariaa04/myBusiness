@@ -2,9 +2,12 @@ package com.example.mybusiness.ui.inicio
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -21,7 +24,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mybusiness.data.Categoria
 import com.example.mybusiness.data.HistorialMes
+import com.example.mybusiness.ui.categorias.CategoriasViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,8 +35,14 @@ import java.util.*
 fun InicioScreen(
     viewModel: InicioViewModel
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val estado by viewModel.uiState.collectAsState()
+    
+    // Obtenemos el viewModel de categorías
+    val catViewModel: CategoriasViewModel = viewModel()
+    val listaCategorias by catViewModel.categorias.collectAsState()
+    
     var mostrarDialogoNuevoMes by remember { mutableStateOf(false) }
+    var mostrarDialogoCategorias by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -40,8 +52,8 @@ fun InicioScreen(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Tarjeta de Beneficio Mensual
-        val esPositivo = uiState.beneficioMensual >= 0
+        // Tarjeta de Beneficio Mensual Actual
+        val esPositivo = estado.beneficioMensual >= 0
         val colorBeneficio = if (esPositivo) MaterialTheme.colorScheme.primary else Color(0xFFFF5252)
         val iconoBeneficio = if (esPositivo) Icons.AutoMirrored.Filled.TrendingUp else Icons.AutoMirrored.Filled.TrendingDown
 
@@ -75,15 +87,15 @@ fun InicioScreen(
                     )
                 }
                 Text(
-                    text = "€${String.format(Locale.getDefault(), "%,.2f", uiState.beneficioMensual)}",
+                    text = "€${String.format(Locale.getDefault(), "%,.2f", estado.beneficioMensual)}",
                     color = colorBeneficio,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
                 
-                val ratio = if (uiState.ingresosTotales > 0) {
-                    (uiState.gastosTotales / uiState.ingresosTotales).toFloat().coerceIn(0f, 1f)
-                } else if (uiState.gastosTotales > 0) 1f else 0f
+                val ratio = if (estado.ingresosTotales > 0) {
+                    (estado.gastosTotales / estado.ingresosTotales).toFloat().coerceIn(0f, 1f)
+                } else if (estado.gastosTotales > 0) 1f else 0f
                 
                 LinearProgressIndicator(
                     progress = { ratio },
@@ -105,14 +117,14 @@ fun InicioScreen(
         ) {
             ResumenCard(
                 titulo = "Ingresos",
-                monto = uiState.ingresosTotales,
+                monto = estado.ingresosTotales,
                 icono = Icons.Default.ArrowUpward,
                 colorIcono = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1.0f)
             )
             ResumenCard(
                 titulo = "Gastos",
-                monto = uiState.gastosTotales,
+                monto = estado.gastosTotales,
                 icono = Icons.Default.ArrowDownward,
                 colorIcono = Color(0xFFFF5252),
                 modifier = Modifier.weight(1.0f)
@@ -121,16 +133,27 @@ fun InicioScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón NUEVO MES
-        Button(
-            onClick = { mostrarDialogoNuevoMes = true },
+        // Botones de acción principal
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            shape = RoundedCornerShape(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(Icons.Default.Add, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("NUEVO MES", fontWeight = FontWeight.Bold)
+            Button(
+                onClick = { mostrarDialogoNuevoMes = true },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("NUEVO MES", fontWeight = FontWeight.Bold)
+            }
+            Button(
+                onClick = { mostrarDialogoCategorias = true },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("CATEGORÍAS", fontWeight = FontWeight.Bold)
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -147,12 +170,13 @@ fun InicioScreen(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(uiState.historial) { mes ->
+            items(estado.historial) { mes ->
                 HistorialCard(mes)
             }
         }
     }
 
+    // Diálogo para cerrar mes
     if (mostrarDialogoNuevoMes) {
         NuevoMesDialog(
             onDismiss = { mostrarDialogoNuevoMes = false },
@@ -162,6 +186,138 @@ fun InicioScreen(
             }
         )
     }
+
+    // Diálogo para gestionar categorías
+    if (mostrarDialogoCategorias) {
+        DialogoGestionCategorias(
+            categorias = listaCategorias,
+            onDismiss = { mostrarDialogoCategorias = false },
+            onAgregar = { nombre, esIngreso, icono ->
+                catViewModel.agregarCategoria(nombre, esIngreso, icono)
+            },
+            onEliminar = { catViewModel.eliminarCategoria(it) }
+        )
+    }
+}
+
+@Composable
+fun DialogoGestionCategorias(
+    categorias: List<Categoria>,
+    onDismiss: () -> Unit,
+    onAgregar: (String, Boolean, String) -> Unit,
+    onEliminar: (Categoria) -> Unit
+) {
+    var nombreCat by remember { mutableStateOf("") }
+    var tipoIngreso by remember { mutableStateOf(true) }
+    var iconoSeleccionado by remember { mutableStateOf("Sell") }
+    val contexto = LocalContext.current
+
+    // Mapa de iconos para que el estudiante vea como se asocian
+    val iconosTemplate = listOf(
+        "Sell" to Icons.Default.Sell,
+        "Build" to Icons.Default.Build,
+        "Restaurant" to Icons.Default.Restaurant,
+        "LocalGasStation" to Icons.Default.LocalGasStation,
+        "Tv" to Icons.Default.Tv,
+        "Work" to Icons.Default.Work,
+        "ShoppingBag" to Icons.Default.ShoppingBag,
+        "Payments" to Icons.Default.Payments,
+        "Home" to Icons.Default.Home
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Gestión de Categorías") },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text("Nueva Categoría:", fontWeight = FontWeight.Bold)
+                TextField(
+                    value = nombreCat,
+                    onValueChange = { nombreCat = it },
+                    label = { Text("Nombre") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(selected = tipoIngreso, onClick = { tipoIngreso = true })
+                    Text("Ingreso")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    RadioButton(selected = !tipoIngreso, onClick = { tipoIngreso = false })
+                    Text("Gasto")
+                }
+                
+                Text("Elige un icono:", modifier = Modifier.padding(top = 8.dp))
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(iconosTemplate) { (nombre, icono) ->
+                        Box(
+                            modifier = Modifier
+                                .size(45.dp)
+                                .clip(CircleShape)
+                                .background(if (iconoSeleccionado == nombre) MaterialTheme.colorScheme.primary else Color.Gray.copy(alpha = 0.2f))
+                                .clickable { iconoSeleccionado = nombre },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = icono,
+                                contentDescription = null,
+                                tint = if (iconoSeleccionado == nombre) Color.White else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+                
+                Button(
+                    onClick = {
+                        if (nombreCat.isBlank()) {
+                            Toast.makeText(contexto, "Escribe un nombre para la categoría", Toast.LENGTH_SHORT).show()
+                        } else {
+                            onAgregar(nombreCat, tipoIngreso, iconoSeleccionado)
+                            nombreCat = ""
+                            Toast.makeText(contexto, "Categoría añadida", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Guardar Nueva")
+                }
+                
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+                
+                Text("Categorías Guardadas:", fontWeight = FontWeight.Bold)
+                Box(modifier = Modifier.height(150.dp)) {
+                    LazyColumn {
+                        items(categorias) { cat ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    val icono = iconosTemplate.find { it.first == cat.iconoNombre }?.second ?: Icons.Default.Category
+                                    Icon(
+                                        imageVector = icono,
+                                        contentDescription = null,
+                                        tint = if (cat.esIngreso) MaterialTheme.colorScheme.primary else Color(0xFFFF5252),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(cat.nombre, fontSize = 14.sp)
+                                }
+                                IconButton(onClick = { onEliminar(cat) }) {
+                                    Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(20.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Cerrar") }
+        }
+    )
 }
 
 @Composable

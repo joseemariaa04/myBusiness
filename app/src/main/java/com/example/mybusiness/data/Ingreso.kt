@@ -8,7 +8,7 @@ data class Ingreso(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val concepto: String,
-    val monto: Double,
+    val cantidad: Double,
     val fecha: Long,
     val categoria: String = "Venta",
     val clienteId: Int? = null

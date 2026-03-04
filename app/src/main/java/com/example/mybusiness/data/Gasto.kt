@@ -8,7 +8,7 @@ data class Gasto(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val concepto: String,
-    val monto: Double,
+    val cantidad: Double,
     val fecha: Long,
     val categoria: String
 )
