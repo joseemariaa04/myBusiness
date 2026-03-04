@@ -1,0 +1,14 @@
+package com.example.mybusiness.data
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "trabajadores")
+data class Trabajador(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val nombre: String,
+    val puesto: String,
+    val telefono: String,
+    val email: String
+)

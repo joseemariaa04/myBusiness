@@ -1,0 +1,4 @@
+<resources>
+
+    <style name="Theme.MyBusiness" parent="Theme.MaterialComponents.Light" />
+</resources>

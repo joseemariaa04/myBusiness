@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Center is (54, 54). Safe zone is roughly a 66dp diameter circle. -->
+    <group
+        android:translateX="27"
+        android:translateY="27">
+
+        <!-- Background Glow/Shadow Effect (Subtle) -->
+        <path
+            android:fillColor="#2239FF14"
+            android:pathData="M10,5 L44,5 C52,5 52,25 44,25 L10,25 L10,50 C10,50 50,50 50,50 C50,50 50,25 50,25" />
+
+        <!-- Main Stylized 'B' Structure (Neon Green) -->
+        <!-- Represents stability and the 'Business' initial -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#39FF14"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M12,8 L40,8 C50,8 50,28 40,28 L12,28 L12,52 L42,52 C54,52 54,32 42,32" />
+
+        <!-- Worker/Client Symbol (Neon Blue) -->
+        <!-- Represents the people management aspect -->
+        <path
+            android:fillColor="#00E5FF"
+            android:pathData="M26,22 A4,4 0 1,0 26,14 A4,4 0 1,0 26,22 Z" />
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#00E5FF"
+            android:strokeWidth="2.5"
+            android:strokeLineCap="round"
+            android:pathData="M18,27 C20,24 32,24 34,27" />
+
+        <!-- Income/Expense Chart Line (Neon Green) -->
+        <!-- Represents tracking and growth -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#39FF14"
+            android:strokeWidth="3"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M12,45 L22,35 L32,42 L42,28" />
+
+    </group>
+</vector>
