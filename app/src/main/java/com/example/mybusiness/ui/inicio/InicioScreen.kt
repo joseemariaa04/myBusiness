@@ -35,7 +35,7 @@ import java.util.*
 fun InicioScreen(
     viewModel: InicioViewModel
 ) {
-    val estado by viewModel.uiState.collectAsState()
+    val estado by viewModel.estado.collectAsState()
     
     // Obtenemos el viewModel de categorías
     val catViewModel: CategoriasViewModel = viewModel()
