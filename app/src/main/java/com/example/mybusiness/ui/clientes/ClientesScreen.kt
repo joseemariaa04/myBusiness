@@ -166,18 +166,6 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
                         color = Color.Gray
                     )
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Gray)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Acciones Rápidas
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
                 IconButton(onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
                         data = Uri.parse("tel:${cliente.telefono}")
@@ -194,7 +182,11 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
                 }) {
                     Icon(Icons.Default.Email, contentDescription = "Enviar Correo", tint = MaterialTheme.colorScheme.secondary)
                 }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Gray)
+                }
             }
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
