@@ -74,7 +74,7 @@ fun IngresosScreen(viewModel: IngresosViewModel) {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     itemsIndexed(ingresos) { index, ingreso ->
-                        AnimacionEntradaLista(index = index) {
+                        AnimacionEntradaLista(indice = index) {
                             IngresoCard(
                                 ingreso = ingreso,
                                 onDelete = { viewModel.eliminarIngreso(ingreso) }
@@ -90,8 +90,8 @@ fun IngresosScreen(viewModel: IngresosViewModel) {
             AgregarIngresoDialog(
                 categoriasDisponibles = if (ingresosCategorias.isEmpty()) listOf("Venta") else ingresosCategorias.map { it.nombre },
                 onDismiss = { mostrarDialogo = false },
-                onConfirm = { concepto, monto, categoria ->
-                    viewModel.agregarIngreso(concepto, monto, System.currentTimeMillis(), categoria)
+                onConfirm = { concepto, cantidad, categoria ->
+                    viewModel.agregarIngreso(concepto, cantidad, System.currentTimeMillis(), categoria)
                     mostrarDialogo = false
                 }
             )
@@ -170,7 +170,7 @@ fun AgregarIngresoDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextField(value = concepto, onValueChange = { concepto = it }, label = { Text("Concepto") })
-                TextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text("Monto") })
+                TextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text("Cantidad") })
                 
                 Text("Selecciona Categoría:", fontWeight = FontWeight.Bold)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -190,7 +190,7 @@ fun AgregarIngresoDialog(
                 if (concepto.isBlank() || cantidadStr.isBlank()) {
                     Toast.makeText(contexto, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
                 } else if (cantidad == null) {
-                    Toast.makeText(contexto, "El monto debe ser un número válido", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(contexto, "La cantidad debe ser un número válido", Toast.LENGTH_SHORT).show()
                 } else {
                     onConfirm(concepto, cantidad, categoriaSeleccionada)
                 }

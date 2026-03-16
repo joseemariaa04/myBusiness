@@ -52,7 +52,7 @@ class BusinessRepository private constructor(context: Context) {
                 fecha = System.currentTimeMillis()
             )
             historialMesDao.insertar(historial)
-
+            //Sentencias SQL manuales para limpiar las tablas
             database.openHelper.writableDatabase.execSQL("DELETE FROM trabajadores")
             database.openHelper.writableDatabase.execSQL("DELETE FROM clientes")
             database.openHelper.writableDatabase.execSQL("DELETE FROM gastos")

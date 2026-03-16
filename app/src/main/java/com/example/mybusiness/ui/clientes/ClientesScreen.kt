@@ -92,8 +92,8 @@ fun ClientesScreen(viewModel: ClientesViewModel) {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    itemsIndexed(clientesFiltrados) { index, cliente ->
-                        AnimacionEntradaLista(index = index) {
+                    itemsIndexed(clientesFiltrados) { indice, cliente ->
+                        AnimacionEntradaLista(indice = indice) {
                             ClienteCard(
                                 cliente = cliente,
                                 onDelete = { viewModel.eliminarCliente(cliente) }

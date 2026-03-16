@@ -56,17 +56,17 @@ fun EstadoVacio(
 
 @Composable
 fun AnimacionEntradaLista(
-    index: Int,
-    content: @Composable () -> Unit
+    indice: Int,
+    contenido: @Composable () -> Unit
 ) {
     AnimatedVisibility(
         visible = true,
-        enter = fadeIn(animationSpec = tween(durationMillis = 500, delayMillis = index * 100)) +
+        enter = fadeIn(animationSpec = tween(durationMillis = 500, delayMillis = indice * 100)) +
                 slideInVertically(
                     initialOffsetY = { 50 },
-                    animationSpec = tween(durationMillis = 500, delayMillis = index * 100)
+                    animationSpec = tween(durationMillis = 500, delayMillis = indice * 100)
                 )
     ) {
-        content()
+        contenido()
     }
 }

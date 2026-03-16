@@ -93,8 +93,8 @@ fun TrabajadoresScreen(viewModel: TrabajadoresViewModel) {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    itemsIndexed(trabajadoresFiltrados) { index, trabajador ->
-                        AnimacionEntradaLista(index = index) {
+                    itemsIndexed(trabajadoresFiltrados) { indice, trabajador ->
+                        AnimacionEntradaLista(indice = indice) {
                             TrabajadorCard(
                                 trabajador = trabajador,
                                 onDelete = { viewModel.eliminarTrabajador(trabajador) }

@@ -73,7 +73,7 @@ fun GastosScreen(viewModel: GastosViewModel) {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     itemsIndexed(gastos) { index, gasto ->
-                        AnimacionEntradaLista(index = index) {
+                        AnimacionEntradaLista(indice = index) {
                             GastoCard(
                                 gasto = gasto,
                                 onDelete = { viewModel.eliminarGasto(gasto) }
@@ -89,8 +89,8 @@ fun GastosScreen(viewModel: GastosViewModel) {
             AgregarGastoDialog(
                 categoriasDisponibles = if (gastosCategorias.isEmpty()) listOf("Varios") else gastosCategorias.map { it.nombre },
                 onDismiss = { mostrarDialogo = false },
-                onConfirm = { concepto, monto, categoria ->
-                    viewModel.agregarGasto(concepto, monto, System.currentTimeMillis(), categoria)
+                onConfirm = { concepto, cantidad, categoria ->
+                    viewModel.agregarGasto(concepto, cantidad, System.currentTimeMillis(), categoria)
                     mostrarDialogo = false
                 }
             )
@@ -182,7 +182,7 @@ fun AgregarGastoDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextField(value = concepto, onValueChange = { concepto = it }, label = { Text("Concepto") })
-                TextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text("Monto") })
+                TextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text("Cantidad") })
                 
                 Text("Selecciona Categoría:", fontWeight = FontWeight.Bold)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -202,7 +202,7 @@ fun AgregarGastoDialog(
                 if (concepto.isBlank() || cantidadStr.isBlank()) {
                     Toast.makeText(contexto, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
                 } else if (cantidad == null) {
-                    Toast.makeText(contexto, "El monto debe ser un número válido", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(contexto, "La cantidad debe ser un número válido", Toast.LENGTH_SHORT).show()
                 } else {
                     onConfirm(concepto, cantidad, categoriaSeleccionada)
                 }
