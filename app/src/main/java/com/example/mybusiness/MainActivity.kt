@@ -58,15 +58,15 @@ fun MainApp() {
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-                itemsNavegacion.forEach { screen ->
+                val navBack by navController.currentBackStackEntryAsState()
+                val destinoActual = navBack?.destination
+                itemsNavegacion.forEach { pantalla ->
                     NavigationBarItem(
-                        icon = { Icon(screen.icon, contentDescription = null) },
-                        label = { Text(screen.title) },
-                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                        icon = { Icon(pantalla.icon, contentDescription = null) },
+                        label = { Text(pantalla.title) },
+                        selected = destinoActual?.hierarchy?.any { it.route == pantalla.route } == true,
                         onClick = {
-                            navController.navigate(screen.route) {
+                            navController.navigate(pantalla.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
