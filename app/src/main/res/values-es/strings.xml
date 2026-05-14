@@ -7,6 +7,7 @@
     <string name="nav_clients">Clientes</string>
     <string name="nav_expenses">Gastos</string>
     <string name="nav_income">Ingresos</string>
+    <string name="nav_chat">Asistente IA</string>
 
     <!-- Pantalla de Inicio -->
     <string name="current_monthly_profit">Beneficio Mensual Actual</string>

@@ -8,6 +8,9 @@ interface ClienteDao {
     @Query("SELECT * FROM clientes ORDER BY nombre ASC")
     fun obtenerTodos(): Flow<List<Cliente>>
 
+    @Query("SELECT * FROM clientes")
+    suspend fun obtenerTodosUnaVez(): List<Cliente>
+
     @Query("SELECT * FROM clientes WHERE id = :id")
     fun obtenerPorId(id: Int): Flow<Cliente>
 

@@ -30,6 +30,8 @@ import com.example.mybusiness.ui.theme.MyBusinessTheme
 import com.example.mybusiness.ui.trabajadores.TrabajadoresScreen
 import com.example.mybusiness.ui.trabajadores.TrabajadoresViewModel
 
+import com.example.mybusiness.ui.chat.ChatScreen
+import com.example.mybusiness.ui.chat.ChatViewModel
 import com.example.mybusiness.ui.inicio.DetalleMesScreen
 import com.example.mybusiness.ui.inicio.DetalleMesViewModel
 import androidx.navigation.NavType
@@ -82,6 +84,7 @@ fun MainApp(prefViewModel: PreferenciasViewModel) {
     val clientesViewModel: ClientesViewModel = viewModel()
     val gastosViewModel: GastosViewModel = viewModel()
     val ingresosViewModel: IngresosViewModel = viewModel()
+    val chatViewModel: ChatViewModel = viewModel()
 
     Scaffold(
         topBar = {
@@ -154,6 +157,7 @@ fun MainApp(prefViewModel: PreferenciasViewModel) {
             composable(Screen.Ingresos.route) { IngresosScreen(viewModel = ingresosViewModel) }
             composable(Screen.Trabajadores.route) { TrabajadoresScreen(viewModel = trabajadoresViewModel) }
             composable(Screen.Clientes.route) { ClientesScreen(viewModel = clientesViewModel) }
+            composable(Screen.Chat.route) { ChatScreen(viewModel = chatViewModel) }
             composable(
                 route = Screen.DetalleMes.route,
                 arguments = listOf(

@@ -99,6 +99,9 @@ fun TrabajadoresScreen(viewModel: TrabajadoresViewModel) {
                         AnimacionEntradaLista(indice = indice) {
                             TrabajadorCard(
                                 trabajador = trabajador,
+                                onToggleActivo = { 
+                                    viewModel.actualizarTrabajador(trabajador.copy(activo = !trabajador.activo))
+                                },
                                 onDelete = { viewModel.eliminarTrabajador(trabajador) }
                             )
                         }
@@ -120,7 +123,7 @@ fun TrabajadoresScreen(viewModel: TrabajadoresViewModel) {
 }
 
 @Composable
-fun TrabajadorCard(trabajador: Trabajador, onDelete: () -> Unit) {
+fun TrabajadorCard(trabajador: Trabajador, onToggleActivo: () -> Unit, onDelete: () -> Unit) {
     val context = LocalContext.current
 
     Card(
@@ -154,13 +157,14 @@ fun TrabajadorCard(trabajador: Trabajador, onDelete: () -> Unit) {
                         val statusColor = if (trabajador.activo) Color(0xFF4CAF50) else Color.Gray
                         Surface(
                             color = statusColor.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(4.dp)
+                            shape = RoundedCornerShape(4.dp),
+                            onClick = onToggleActivo
                         ) {
                             Text(
                                 text = if (trabajador.activo) stringResource(R.string.active) else stringResource(R.string.inactive),
                                 color = statusColor,
                                 fontSize = 10.sp,
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
                     }

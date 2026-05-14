@@ -73,13 +73,27 @@ class BusinessRepository private constructor(context: Context) {
         // Obtenemos los totales actuales directamente de la base de datos
         val ingresosList = ingresoDao.obtenerTodosUnaVez()
         val gastosList = gastoDao.obtenerTodosUnaVez()
-        val trabajadores = trabajadorDao.obtenerTodosUnaVez()
+        val trabajadoresActivos = trabajadorDao.obtenerActivos()
 
-        val salarioActivos = trabajadores.filter { it.activo }.sumOf { it.salario }
+        val salarioActivos = trabajadoresActivos.sumOf { it.salario }
         val totalIngresos = ingresosList.sumOf { it.cantidad }
         val totalGastos = gastosList.sumOf { it.cantidad } + salarioActivos
 
         iniciarNuevoMes(nombreMes, totalIngresos, totalGastos)
+    }
+
+    suspend fun obtenerResumenActual(): Map<String, Any> {
+        val ingresos = ingresoDao.obtenerTodosUnaVez().sumOf { it.cantidad }
+        val gastos = gastoDao.obtenerTodosUnaVez().sumOf { it.cantidad }
+        val numTrabajadores = trabajadorDao.obtenerActivos().size
+        val numClientes = clienteDao.obtenerTodosUnaVez().size
+        
+        return mapOf(
+            "ingresos" to ingresos,
+            "gastos" to gastos,
+            "trabajadores" to numTrabajadores,
+            "clientes" to numClientes
+        )
     }
 
     companion object {
