@@ -50,12 +50,15 @@
     <string name="new_expense">Nuevo Gasto</string>
     <string name="new_income_entry">Nuevo Ingreso</string>
     <string name="concept">Concepto</string>
-    <string name="amount">Cantidad</string>
+    <string name="salary">Salario:</string>
     <string name="select_category">Selecciona Categoría:</string>
     <string name="fixed_expense">Gasto Fijo (No se borra al cambiar de mes)</string>
     <string name="fixed_income">Ingreso Fijo (No se borra al cambiar de mes)</string>
     <string name="fixed">Fijo</string>
     <string name="delete">Eliminar</string>
+    <string name="delete_confirm_title">Confirmar eliminación</string>
+    <string name="delete_worker_confirm_desc">¿Estás seguro de que deseas eliminar al trabajador %1$s? Esta acción no se puede deshacer.</string>
+    <string name="delete_client_confirm_desc">¿Estás seguro de que deseas eliminar al cliente %1$s? Esta acción no se puede deshacer.</string>
     <string name="add_expense_desc">Agregar Gasto</string>
     <string name="add_income_desc">Agregar Ingreso</string>
     <string name="salario">Salario Mensual</string>

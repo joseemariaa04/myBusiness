@@ -35,6 +35,10 @@ import java.util.*
 
 import com.example.mybusiness.ui.IconosCategoria
 import com.example.mybusiness.ui.PreferenciasViewModel
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
 
 @Composable
 fun InicioScreen(
@@ -44,6 +48,20 @@ fun InicioScreen(
 ) {
     val estado by viewModel.estado.collectAsState()
     val contexto = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Detectar cambios de fecha al volver a la aplicación (útil si el usuario cambia la fecha en ajustes)
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.comprobarCierreMesAutomatico()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.eventos.collect { mensaje ->

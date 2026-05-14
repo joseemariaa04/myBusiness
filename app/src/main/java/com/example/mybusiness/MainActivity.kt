@@ -180,6 +180,7 @@ fun MainApp(prefViewModel: PreferenciasViewModel) {
         if (mostrarConfig) {
             DialogoConfiguracion(
                 prefViewModel = prefViewModel,
+                inicioViewModel = inicioViewModel,
                 onDismiss = { mostrarConfig = false }
             )
         }
@@ -189,6 +190,7 @@ fun MainApp(prefViewModel: PreferenciasViewModel) {
 @Composable
 fun DialogoConfiguracion(
     prefViewModel: PreferenciasViewModel,
+    inicioViewModel: InicioViewModel,
     onDismiss: () -> Unit
 ) {
     var nombreTmp by remember { mutableStateOf(prefViewModel.nombreEmpresa) }
@@ -256,7 +258,12 @@ fun DialogoConfiguracion(
                     }
                     Switch(
                         checked = prefViewModel.cierreAutomatico,
-                        onCheckedChange = { prefViewModel.guardarCierreAutomatico(it) }
+                        onCheckedChange = { 
+                            prefViewModel.guardarCierreAutomatico(it)
+                            if (it) {
+                                inicioViewModel.comprobarCierreMesAutomatico()
+                            }
+                        }
                     )
                 }
             }

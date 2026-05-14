@@ -18,7 +18,7 @@ data class ChatMessage(
 class ChatViewModel : ViewModel() {
 
     // NOTA: Genera una clave nueva si esta ha sido expuesta.
-    private val API_KEY = "Bearer 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"
+    private val API_KEY = "API_KEY"
     
     // Modelo experimental con razonamiento (Reasoning)
     private val MODEL_ID = "inclusionai/ring-2.6-1t:free"

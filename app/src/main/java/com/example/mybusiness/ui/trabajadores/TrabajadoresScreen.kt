@@ -37,6 +37,7 @@ import com.example.mybusiness.ui.EstadoVacio
 fun TrabajadoresScreen(viewModel: TrabajadoresViewModel) {
     val trabajadores by viewModel.trabajadores.collectAsState()
     var mostrarDialogo by remember { mutableStateOf(false) }
+    var trabajadorAEliminar by remember { mutableStateOf<Trabajador?>(null) }
     var textoBusqueda by remember { mutableStateOf("") }
 
     val trabajadoresFiltrados = trabajadores.filter {
@@ -102,12 +103,36 @@ fun TrabajadoresScreen(viewModel: TrabajadoresViewModel) {
                                 onToggleActivo = { 
                                     viewModel.actualizarTrabajador(trabajador.copy(activo = !trabajador.activo))
                                 },
-                                onDelete = { viewModel.eliminarTrabajador(trabajador) }
+                                onDelete = { trabajadorAEliminar = trabajador }
                             )
                         }
                     }
                 }
             }
+        }
+
+        if (trabajadorAEliminar != null) {
+            AlertDialog(
+                onDismissRequest = { trabajadorAEliminar = null },
+                title = { Text(stringResource(R.string.delete_confirm_title)) },
+                text = { Text(stringResource(R.string.delete_worker_confirm_desc, trabajadorAEliminar?.nombre ?: "")) },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            trabajadorAEliminar?.let { viewModel.eliminarTrabajador(it) }
+                            trabajadorAEliminar = null
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text(stringResource(R.string.delete))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { trabajadorAEliminar = null }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
         }
 
         if (mostrarDialogo) {
@@ -169,7 +194,7 @@ fun TrabajadorCard(trabajador: Trabajador, onToggleActivo: () -> Unit, onDelete:
                         }
                     }
                     Text(
-                        text = "${trabajador.puesto} • ${stringResource(R.string.amount)}: ${trabajador.salario}",
+                        text = "${trabajador.puesto} • ${stringResource(R.string.salary)}: ${trabajador.salario}",
                         fontSize = 14.sp,
                         color = Color.Gray
                     )

@@ -36,6 +36,7 @@ import com.example.mybusiness.ui.EstadoVacio
 fun ClientesScreen(viewModel: ClientesViewModel) {
     val clientes by viewModel.clientes.collectAsState()
     var mostrarDialogo by remember { mutableStateOf(false) }
+    var clienteAEliminar by remember { mutableStateOf<Cliente?>(null) }
     var textoBusqueda by remember { mutableStateOf("") }
 
     val clientesFiltrados = clientes.filter {
@@ -98,12 +99,36 @@ fun ClientesScreen(viewModel: ClientesViewModel) {
                         AnimacionEntradaLista(indice = indice) {
                             ClienteCard(
                                 cliente = cliente,
-                                onDelete = { viewModel.eliminarCliente(cliente) }
+                                onDelete = { clienteAEliminar = cliente }
                             )
                         }
                     }
                 }
             }
+        }
+
+        if (clienteAEliminar != null) {
+            AlertDialog(
+                onDismissRequest = { clienteAEliminar = null },
+                title = { Text(stringResource(R.string.delete_confirm_title)) },
+                text = { Text(stringResource(R.string.delete_client_confirm_desc, clienteAEliminar?.nombre ?: "")) },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            clienteAEliminar?.let { viewModel.eliminarCliente(it) }
+                            clienteAEliminar = null
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text(stringResource(R.string.delete))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { clienteAEliminar = null }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
         }
 
         if (mostrarDialogo) {
@@ -174,7 +199,6 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
                     Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Gray)
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }

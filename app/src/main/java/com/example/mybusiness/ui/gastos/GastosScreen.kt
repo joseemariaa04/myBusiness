@@ -194,7 +194,7 @@ fun AgregarGastoDialog(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedTextField(value = concepto, onValueChange = { concepto = it }, label = { Text(stringResource(R.string.concept)) }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text(stringResource(R.string.amount)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text(stringResource(R.string.salary)) }, modifier = Modifier.fillMaxWidth())
 
                 Text(stringResource(R.string.select_category), fontWeight = FontWeight.Bold)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

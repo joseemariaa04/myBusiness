@@ -50,12 +50,15 @@
     <string name="new_expense">New Expense</string>
     <string name="new_income_entry">New Income</string>
     <string name="concept">Concept</string>
-    <string name="amount">Amount</string>
+    <string name="salary">Amount</string>
     <string name="select_category">Select Category:</string>
     <string name="fixed_expense">Fixed Expense (Not deleted when changing month)</string>
     <string name="fixed_income">Fixed Income (Not deleted when changing month)</string>
     <string name="fixed">Fixed</string>
     <string name="delete">Delete</string>
+    <string name="delete_confirm_title">Confirm Deletion</string>
+    <string name="delete_worker_confirm_desc">Are you sure you want to delete worker %1$s? This action cannot be undone.</string>
+    <string name="delete_client_confirm_desc">Are you sure you want to delete client %1$s? This action cannot be undone.</string>
     <string name="add_expense_desc">Add Expense</string>
     <string name="add_income_desc">Add Income</string>
     <string name="salario">Monthly Salary</string>
