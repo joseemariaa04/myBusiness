@@ -17,9 +17,17 @@ class GastosViewModel(application: Application) : AndroidViewModel(application) 
     val gastos: StateFlow<List<Gasto>> = repository.todosLosGastos
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun agregarGasto(concepto: String, monto: Double, fecha: Long, categoria: String) {
+    fun agregarGasto(concepto: String, monto: Double, fecha: Long, categoria: String, esFijo: Boolean = false) {
         viewModelScope.launch {
-            repository.insertarGasto(Gasto(concepto = concepto, cantidad = monto, fecha = fecha, categoria = categoria))
+            repository.insertarGasto(
+                Gasto(
+                    concepto = concepto,
+                    cantidad = monto,
+                    fecha = fecha,
+                    categoria = categoria,
+                    esFijo = esFijo
+                )
+            )
         }
     }
 

@@ -10,5 +10,7 @@ data class Trabajador(
     val nombre: String,
     val puesto: String,
     val telefono: String,
-    val email: String
+    val email: String,
+    val salario: Double = 0.0,
+    val activo: Boolean = true
 )

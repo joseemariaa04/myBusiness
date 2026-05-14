@@ -29,8 +29,14 @@ import com.example.mybusiness.ui.categorias.CategoriasViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
+import androidx.compose.ui.res.stringResource
+import com.example.mybusiness.R
+import com.example.mybusiness.data.Categoria
+import com.example.mybusiness.ui.IconosCategoria
+import com.example.mybusiness.ui.PreferenciasViewModel
+
 @Composable
-fun IngresosScreen(viewModel: IngresosViewModel) {
+fun IngresosScreen(viewModel: IngresosViewModel, prefViewModel: PreferenciasViewModel = viewModel()) {
     val ingresos by viewModel.ingresos.collectAsState()
     val catViewModel: CategoriasViewModel = viewModel()
     val categorias by catViewModel.categorias.collectAsState()
@@ -44,7 +50,7 @@ fun IngresosScreen(viewModel: IngresosViewModel) {
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar Ingreso")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_income_desc))
             }
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -56,7 +62,7 @@ fun IngresosScreen(viewModel: IngresosViewModel) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Ingresos recientes",
+                text = stringResource(R.string.recent_income),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -65,8 +71,8 @@ fun IngresosScreen(viewModel: IngresosViewModel) {
 
             if (ingresos.isEmpty()) {
                 EstadoVacio(
-                    mensaje = "No hay ingresos",
-                    subMensaje = "Registra tu primer ingreso pulsando el botón +",
+                    mensaje = stringResource(R.string.no_income),
+                    subMensaje = stringResource(R.string.register_first_income),
                     icono = Icons.AutoMirrored.Filled.TrendingUp
                 )
             } else {
@@ -88,10 +94,10 @@ fun IngresosScreen(viewModel: IngresosViewModel) {
         if (mostrarDialogo) {
             val ingresosCategorias = categorias.filter { it.esIngreso }
             AgregarIngresoDialog(
-                categoriasDisponibles = if (ingresosCategorias.isEmpty()) listOf("Venta") else ingresosCategorias.map { it.nombre },
+                categoriasData = if (ingresosCategorias.isEmpty()) listOf(Categoria(nombre = "Venta", esIngreso = true, iconoNombre = "Sell")) else ingresosCategorias,
                 onDismiss = { mostrarDialogo = false },
-                onConfirm = { concepto, cantidad, categoria ->
-                    viewModel.agregarIngreso(concepto, cantidad, System.currentTimeMillis(), categoria)
+                onConfirm = { concepto, cantidad, categoria, esFijo ->
+                    viewModel.agregarIngreso(concepto, cantidad, System.currentTimeMillis(), categoria, esFijo)
                     mostrarDialogo = false
                 }
             )
@@ -100,7 +106,11 @@ fun IngresosScreen(viewModel: IngresosViewModel) {
 }
 
 @Composable
-fun IngresoCard(ingreso: Ingreso, onDelete: () -> Unit) {
+fun IngresoCard(ingreso: Ingreso, onDelete: () -> Unit, prefViewModel: PreferenciasViewModel = viewModel(), catViewModel: CategoriasViewModel = viewModel()) {
+    val categorias by catViewModel.categorias.collectAsState()
+    val categoriaData = categorias.find { it.nombre == ingreso.categoria }
+    val icono = IconosCategoria.obtenerIcono(categoriaData?.iconoNombre)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -117,16 +127,27 @@ fun IngresoCard(ingreso: Ingreso, onDelete: () -> Unit) {
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(imageVector = Icons.Default.ArrowUpward, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(imageVector = icono, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = ingreso.concepto,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = ingreso.concepto,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (ingreso.esFijo) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            Icons.Default.PushPin,
+                            contentDescription = stringResource(R.string.fixed),
+                            modifier = Modifier.size(12.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
                 Text(
                     text = SimpleDateFormat("dd MMM, h:mm a", Locale.getDefault()).format(Date(ingreso.fecha)),
                     fontSize = 12.sp,
@@ -135,7 +156,7 @@ fun IngresoCard(ingreso: Ingreso, onDelete: () -> Unit) {
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "+€${String.format(Locale.getDefault(), "%,.2f", ingreso.cantidad)}",
+                    text = "+${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", ingreso.cantidad)}",
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -147,7 +168,7 @@ fun IngresoCard(ingreso: Ingreso, onDelete: () -> Unit) {
                 )
             }
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Gray)
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Gray)
             }
         }
     }
@@ -155,52 +176,70 @@ fun IngresoCard(ingreso: Ingreso, onDelete: () -> Unit) {
 
 @Composable
 fun AgregarIngresoDialog(
-    categoriasDisponibles: List<String>,
-    onDismiss: () -> Unit, 
-    onConfirm: (String, Double, String) -> Unit
+    categoriasData: List<Categoria>,
+    onDismiss: () -> Unit,
+    onConfirm: (String, Double, String, Boolean) -> Unit
 ) {
     var concepto by remember { mutableStateOf("") }
     var cantidadStr by remember { mutableStateOf("") }
-    var categoriaSeleccionada by remember { mutableStateOf(categoriasDisponibles.first()) }
+    var categoriaSeleccionada by remember { mutableStateOf(categoriasData.first().nombre) }
+    var esFijo by remember { mutableStateOf(false) }
     val contexto = LocalContext.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nuevo Ingreso") },
+        title = { Text(stringResource(R.string.new_income_entry)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextField(value = concepto, onValueChange = { concepto = it }, label = { Text("Concepto") })
-                TextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text("Cantidad") })
-                
-                Text("Selecciona Categoría:", fontWeight = FontWeight.Bold)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(value = concepto, onValueChange = { concepto = it }, label = { Text(stringResource(R.string.concept)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text(stringResource(R.string.amount)) }, modifier = Modifier.fillMaxWidth())
+
+                Text(stringResource(R.string.select_category), fontWeight = FontWeight.Bold)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(categoriasDisponibles) { cat ->
+                    items(categoriasData) { cat ->
                         FilterChip(
-                            selected = categoriaSeleccionada == cat,
-                            onClick = { categoriaSeleccionada = cat },
-                            label = { Text(cat) }
+                            selected = categoriaSeleccionada == cat.nombre,
+                            onClick = { categoriaSeleccionada = cat.nombre },
+                            label = { 
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = IconosCategoria.obtenerIcono(cat.iconoNombre),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(cat.nombre)
+                                }
+                            }
                         )
                     }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = esFijo, onCheckedChange = { esFijo = it })
+                    Text(stringResource(R.string.fixed_income))
                 }
             }
         },
         confirmButton = {
-            Button(onClick = { 
+            Button(onClick = {
                 val cantidad = cantidadStr.toDoubleOrNull()
                 if (concepto.isBlank() || cantidadStr.isBlank()) {
-                    Toast.makeText(contexto, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(contexto, contexto.getString(R.string.all_fields_required), Toast.LENGTH_SHORT).show()
                 } else if (cantidad == null) {
-                    Toast.makeText(contexto, "La cantidad debe ser un número válido", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(contexto, contexto.getString(R.string.invalid_amount), Toast.LENGTH_SHORT).show()
                 } else {
-                    onConfirm(concepto, cantidad, categoriaSeleccionada)
+                    onConfirm(concepto, cantidad, categoriaSeleccionada, esFijo)
                 }
             }) {
-                Text("Agregar")
+                Text(stringResource(R.string.add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

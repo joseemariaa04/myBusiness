@@ -25,17 +25,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.example.mybusiness.R
 import com.example.mybusiness.data.Categoria
 import com.example.mybusiness.data.HistorialMes
 import com.example.mybusiness.ui.categorias.CategoriasViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.example.mybusiness.ui.IconosCategoria
+import com.example.mybusiness.ui.PreferenciasViewModel
+
 @Composable
 fun InicioScreen(
-    viewModel: InicioViewModel
+    viewModel: InicioViewModel,
+    onVerDetalleMes: (Int, String) -> Unit,
+    prefViewModel: PreferenciasViewModel = viewModel()
 ) {
     val estado by viewModel.estado.collectAsState()
+    val contexto = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.eventos.collect { mensaje ->
+            Toast.makeText(contexto, mensaje, Toast.LENGTH_LONG).show()
+        }
+    }
     
     // Obtenemos el viewModel de categorías
     val catViewModel: CategoriasViewModel = viewModel()
@@ -76,7 +90,7 @@ fun InicioScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Beneficio Mensual Actual",
+                        text = stringResource(R.string.current_monthly_profit),
                         color = Color.Gray,
                         fontSize = 14.sp
                     )
@@ -87,7 +101,7 @@ fun InicioScreen(
                     )
                 }
                 Text(
-                    text = "€${String.format(Locale.getDefault(), "%,.2f", estado.beneficioMensual)}",
+                    text = "${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", estado.beneficioMensual)}",
                     color = colorBeneficio,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
@@ -116,14 +130,14 @@ fun InicioScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ResumenCard(
-                titulo = "Ingresos",
+                titulo = stringResource(R.string.income),
                 monto = estado.ingresosTotales,
                 icono = Icons.Default.ArrowUpward,
                 colorIcono = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1.0f)
             )
             ResumenCard(
-                titulo = "Gastos",
+                titulo = stringResource(R.string.expenses),
                 monto = estado.gastosTotales,
                 icono = Icons.Default.ArrowDownward,
                 colorIcono = Color(0xFFFF5252),
@@ -144,7 +158,7 @@ fun InicioScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("NUEVO MES", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.new_month), fontWeight = FontWeight.Bold)
             }
             Button(
                 onClick = { mostrarDialogoCategorias = true },
@@ -152,14 +166,14 @@ fun InicioScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("CATEGORÍAS", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.categories), fontWeight = FontWeight.Bold)
             }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "HISTORIAL",
+            text = stringResource(R.string.history),
             color = MaterialTheme.colorScheme.onSurface,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
@@ -171,7 +185,7 @@ fun InicioScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(estado.historial) { mes ->
-                HistorialCard(mes)
+                HistorialCard(mes, onClick = { onVerDetalleMes(mes.id, mes.nombreMes) })
             }
         }
     }
@@ -180,8 +194,8 @@ fun InicioScreen(
     if (mostrarDialogoNuevoMes) {
         NuevoMesDialog(
             onDismiss = { mostrarDialogoNuevoMes = false },
-            onConfirm = { nombre ->
-                viewModel.cerrarMesActual(nombre)
+            onConfirm = {
+                viewModel.cerrarMesActual()
                 mostrarDialogoNuevoMes = false
             }
         )
@@ -212,40 +226,30 @@ fun DialogoGestionCategorias(
     var iconoSeleccionado by remember { mutableStateOf("Sell") }
     val contexto = LocalContext.current
 
-    // Mapa de iconos para que el estudiante vea como se asocian
-    val iconosTemplate = listOf(
-        "Sell" to Icons.Default.Sell,
-        "Build" to Icons.Default.Build,
-        "Restaurant" to Icons.Default.Restaurant,
-        "LocalGasStation" to Icons.Default.LocalGasStation,
-        "Tv" to Icons.Default.Tv,
-        "Work" to Icons.Default.Work,
-        "ShoppingBag" to Icons.Default.ShoppingBag,
-        "Payments" to Icons.Default.Payments,
-        "Home" to Icons.Default.Home
-    )
+    // Mapa de iconos centralizado
+    val iconosTemplate = IconosCategoria.mapa.toList()
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Gestión de Categorías") },
+        title = { Text(stringResource(R.string.manage_categories)) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text("Nueva Categoría:", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.new_category), fontWeight = FontWeight.Bold)
                 TextField(
                     value = nombreCat,
                     onValueChange = { nombreCat = it },
-                    label = { Text("Nombre") },
+                    label = { Text(stringResource(R.string.name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(selected = tipoIngreso, onClick = { tipoIngreso = true })
-                    Text("Ingreso")
+                    Text(stringResource(R.string.income))
                     Spacer(modifier = Modifier.width(8.dp))
                     RadioButton(selected = !tipoIngreso, onClick = { tipoIngreso = false })
-                    Text("Gasto")
+                    Text(stringResource(R.string.expenses))
                 }
                 
-                Text("Elige un icono:", modifier = Modifier.padding(top = 8.dp))
+                Text(stringResource(R.string.choose_icon), modifier = Modifier.padding(top = 8.dp))
                 LazyRow(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -271,21 +275,21 @@ fun DialogoGestionCategorias(
                 Button(
                     onClick = {
                         if (nombreCat.isBlank()) {
-                            Toast.makeText(contexto, "Escribe un nombre para la categoría", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(contexto, contexto.getString(R.string.category_name_required), Toast.LENGTH_SHORT).show()
                         } else {
                             onAgregar(nombreCat, tipoIngreso, iconoSeleccionado)
                             nombreCat = ""
-                            Toast.makeText(contexto, "Categoría añadida", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(contexto, contexto.getString(R.string.category_added), Toast.LENGTH_SHORT).show()
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Guardar Nueva")
+                    Text(stringResource(R.string.save_new))
                 }
                 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                 
-                Text("Categorías Guardadas:", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.saved_categories), fontWeight = FontWeight.Bold)
                 Box(modifier = Modifier.height(150.dp)) {
                     LazyColumn {
                         items(categorias) { cat ->
@@ -295,7 +299,7 @@ fun DialogoGestionCategorias(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    val icono = iconosTemplate.find { it.first == cat.iconoNombre }?.second ?: Icons.Default.Category
+                                    val icono = IconosCategoria.obtenerIcono(cat.iconoNombre)
                                     Icon(
                                         imageVector = icono,
                                         contentDescription = null,
@@ -315,15 +319,17 @@ fun DialogoGestionCategorias(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cerrar") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
 }
 
 @Composable
-fun HistorialCard(mes: HistorialMes) {
+fun HistorialCard(mes: HistorialMes, onClick: () -> Unit, prefViewModel: PreferenciasViewModel = viewModel()) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -346,13 +352,13 @@ fun HistorialCard(mes: HistorialMes) {
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "€${String.format(Locale.getDefault(), "%,.2f", mes.beneficio)}",
+                    text = "${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", mes.beneficio)}",
                     color = if (mes.beneficio >= 0) MaterialTheme.colorScheme.primary else Color(0xFFFF5252),
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
                 Text(
-                    text = "I: €${String.format(Locale.getDefault(), "%,.0f", mes.ingresosTotales)} | G: €${String.format(Locale.getDefault(), "%,.0f", mes.gastosTotales)}",
+                    text = "I: ${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.0f", mes.ingresosTotales)} | G: ${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.0f", mes.gastosTotales)}",
                     fontSize = 10.sp,
                     color = Color.Gray
                 )
@@ -362,39 +368,25 @@ fun HistorialCard(mes: HistorialMes) {
 }
 
 @Composable
-fun NuevoMesDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
-    var nombre by remember { mutableStateOf("") }
-    val contexto = LocalContext.current
-
+fun NuevoMesDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Cerrar Mes Actual") },
+        title = { Text(stringResource(R.string.close_month_title)) },
         text = {
             Column {
-                Text("Introduce el nombre del mes (ej. Enero 2024). Esto borrará todos los datos actuales y los guardará en el historial.")
-                Spacer(modifier = Modifier.height(16.dp))
-                TextField(
-                    value = nombre,
-                    onValueChange = { nombre = it },
-                    label = { Text("Nombre del Mes") },
-                    placeholder = { Text("Enero 2024") }
-                )
+                Text(stringResource(R.string.close_month_desc))
             }
         },
         confirmButton = {
             Button(onClick = { 
-                if (nombre.isBlank()) {
-                    Toast.makeText(contexto, "El nombre del mes es obligatorio", Toast.LENGTH_SHORT).show()
-                } else {
-                    onConfirm(nombre)
-                }
+                onConfirm()
             }) {
-                Text("Confirmar y Reiniciar")
+                Text(stringResource(R.string.confirm_restart))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -406,7 +398,8 @@ fun ResumenCard(
     monto: Double,
     icono: ImageVector,
     colorIcono: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    prefViewModel: PreferenciasViewModel = viewModel()
 ) {
     Card(
         modifier = modifier.height(100.dp),
@@ -428,7 +421,7 @@ fun ResumenCard(
                 Icon(imageVector = icono, contentDescription = null, tint = colorIcono, modifier = Modifier.size(16.dp))
             }
             Text(
-                text = "€${String.format(Locale.getDefault(), "%,.2f", monto)}",
+                text = "${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", monto)}",
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold

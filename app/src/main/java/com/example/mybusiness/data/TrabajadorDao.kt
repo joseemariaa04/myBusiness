@@ -8,8 +8,14 @@ interface TrabajadorDao {
     @Query("SELECT * FROM trabajadores ORDER BY nombre ASC")
     fun obtenerTodos(): Flow<List<Trabajador>>
 
+    @Query("SELECT * FROM trabajadores")
+    suspend fun obtenerTodosUnaVez(): List<Trabajador>
+
     @Query("SELECT * FROM trabajadores WHERE id = :id")
     fun obtenerPorId(id: Int): Flow<Trabajador>
+
+    @Query("SELECT * FROM trabajadores WHERE activo = 1")
+    suspend fun obtenerActivos(): List<Trabajador>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertar(trabajador: Trabajador)

@@ -17,9 +17,24 @@ class TrabajadoresViewModel(application: Application) : AndroidViewModel(applica
     val trabajadores: StateFlow<List<Trabajador>> = repository.todosLosTrabajadores
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun agregarTrabajador(nombre: String, puesto: String, telefono: String, email: String) {
+    fun agregarTrabajador(nombre: String, puesto: String, telefono: String, email: String, salario: Double, activo: Boolean) {
         viewModelScope.launch {
-            repository.insertarTrabajador(Trabajador(nombre = nombre, puesto = puesto, telefono = telefono, email = email))
+            repository.insertarTrabajador(
+                Trabajador(
+                    nombre = nombre,
+                    puesto = puesto,
+                    telefono = telefono,
+                    email = email,
+                    salario = salario,
+                    activo = activo
+                )
+            )
+        }
+    }
+
+    fun actualizarTrabajador(trabajador: Trabajador) {
+        viewModelScope.launch {
+            repository.insertarTrabajador(trabajador)
         }
     }
 

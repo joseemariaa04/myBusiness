@@ -30,21 +30,52 @@ import com.example.mybusiness.ui.theme.MyBusinessTheme
 import com.example.mybusiness.ui.trabajadores.TrabajadoresScreen
 import com.example.mybusiness.ui.trabajadores.TrabajadoresViewModel
 
+import com.example.mybusiness.ui.inicio.DetalleMesScreen
+import com.example.mybusiness.ui.inicio.DetalleMesViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.example.mybusiness.ui.PreferenciasViewModel
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyBusinessTheme {
-                MainApp()
+            val prefViewModel: PreferenciasViewModel = viewModel()
+            val darkTheme = when (prefViewModel.modoOscuro) {
+                true -> true
+                false -> false
+                null -> isSystemInDarkTheme()
+            }
+            
+            MyBusinessTheme(darkTheme = darkTheme) {
+                MainApp(prefViewModel)
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainApp() {
+fun MainApp(prefViewModel: PreferenciasViewModel) {
     val navController = rememberNavController()
+    var mostrarConfig by remember { mutableStateOf(false) }
 
     val inicioViewModel: InicioViewModel = viewModel()
     val trabajadoresViewModel: TrabajadoresViewModel = viewModel()
@@ -53,6 +84,26 @@ fun MainApp() {
     val ingresosViewModel: IngresosViewModel = viewModel()
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { 
+                    Text(
+                        text = prefViewModel.nombreEmpresa,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                actions = {
+                    IconButton(onClick = { mostrarConfig = true }) {
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        },
         bottomBar = {
             NavigationBar(
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -63,7 +114,7 @@ fun MainApp() {
                 itemsNavegacion.forEach { pantalla ->
                     NavigationBarItem(
                         icon = { Icon(pantalla.icon, contentDescription = null) },
-                        label = { Text(pantalla.title) },
+                        label = { Text(stringResource(pantalla.titleRes)) },
                         selected = destinoActual?.hierarchy?.any { it.route == pantalla.route } == true,
                         onClick = {
                             navController.navigate(pantalla.route) {
@@ -93,13 +144,131 @@ fun MainApp() {
         ) {
             composable(Screen.Inicio.route) {
                 InicioScreen(
-                    viewModel = inicioViewModel
+                    viewModel = inicioViewModel,
+                    onVerDetalleMes = { id, nombre ->
+                        navController.navigate("detalle_mes/$id/$nombre")
+                    }
                 )
             }
             composable(Screen.Gastos.route) { GastosScreen(viewModel = gastosViewModel) }
             composable(Screen.Ingresos.route) { IngresosScreen(viewModel = ingresosViewModel) }
             composable(Screen.Trabajadores.route) { TrabajadoresScreen(viewModel = trabajadoresViewModel) }
             composable(Screen.Clientes.route) { ClientesScreen(viewModel = clientesViewModel) }
+            composable(
+                route = Screen.DetalleMes.route,
+                arguments = listOf(
+                    navArgument("mesId") { type = NavType.IntType },
+                    navArgument("nombreMes") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val mesId = backStackEntry.arguments?.getInt("mesId") ?: 0
+                val nombreMes = backStackEntry.arguments?.getString("nombreMes") ?: ""
+                val detalleViewModel: DetalleMesViewModel = viewModel()
+                DetalleMesScreen(
+                    mesId = mesId,
+                    nombreMes = nombreMes,
+                    viewModel = detalleViewModel,
+                    onVolver = { navController.popBackStack() }
+                )
+            }
+        }
+
+        if (mostrarConfig) {
+            DialogoConfiguracion(
+                prefViewModel = prefViewModel,
+                onDismiss = { mostrarConfig = false }
+            )
         }
     }
+}
+
+@Composable
+fun DialogoConfiguracion(
+    prefViewModel: PreferenciasViewModel,
+    onDismiss: () -> Unit
+) {
+    var nombreTmp by remember { mutableStateOf(prefViewModel.nombreEmpresa) }
+    val monedas = listOf("€", "$", "£", "¥", "MXN")
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = nombreTmp,
+                    onValueChange = { nombreTmp = it },
+                    label = { Text(stringResource(R.string.company_name)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Text(stringResource(R.string.currency_symbol), fontWeight = FontWeight.Bold)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(monedas) { simbolo ->
+                        FilterChip(
+                            selected = prefViewModel.simboloMoneda == simbolo,
+                            onClick = { prefViewModel.guardarSimboloMoneda(simbolo) },
+                            label = { Text(simbolo) }
+                        )
+                    }
+                }
+
+                Text(stringResource(R.string.app_theme), fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = prefViewModel.modoOscuro == false,
+                        onClick = { prefViewModel.guardarModoOscuro(false) },
+                        label = { Text(stringResource(R.string.light)) }
+                    )
+                    FilterChip(
+                        selected = prefViewModel.modoOscuro == true,
+                        onClick = { prefViewModel.guardarModoOscuro(true) },
+                        label = { Text(stringResource(R.string.dark)) }
+                    )
+                    FilterChip(
+                        selected = prefViewModel.modoOscuro == null,
+                        onClick = { prefViewModel.guardarModoOscuro(null) },
+                        label = { Text(stringResource(R.string.system)) }
+                    )
+                }
+
+                HorizontalDivider()
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.auto_month_closure), fontWeight = FontWeight.Bold)
+                        Text(
+                            stringResource(R.string.auto_month_closure_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = prefViewModel.cierreAutomatico,
+                        onCheckedChange = { prefViewModel.guardarCierreAutomatico(it) }
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                prefViewModel.guardarNombreEmpresa(nombreTmp)
+                onDismiss()
+            }) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close))
+            }
+        }
+    )
 }

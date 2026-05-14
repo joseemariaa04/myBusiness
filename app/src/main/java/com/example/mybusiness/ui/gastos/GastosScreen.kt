@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.example.mybusiness.R
 import com.example.mybusiness.data.Gasto
 import com.example.mybusiness.ui.AnimacionEntradaLista
 import com.example.mybusiness.ui.EstadoVacio
@@ -28,8 +30,12 @@ import com.example.mybusiness.ui.categorias.CategoriasViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.example.mybusiness.data.Categoria
+import com.example.mybusiness.ui.IconosCategoria
+import com.example.mybusiness.ui.PreferenciasViewModel
+
 @Composable
-fun GastosScreen(viewModel: GastosViewModel) {
+fun GastosScreen(viewModel: GastosViewModel, prefViewModel: PreferenciasViewModel = viewModel()) {
     val gastos by viewModel.gastos.collectAsState()
     val catViewModel: CategoriasViewModel = viewModel()
     val categorias by catViewModel.categorias.collectAsState()
@@ -43,7 +49,7 @@ fun GastosScreen(viewModel: GastosViewModel) {
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar Gasto")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_expense_desc))
             }
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -55,7 +61,7 @@ fun GastosScreen(viewModel: GastosViewModel) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Gastos recientes",
+                text = stringResource(R.string.recent_expenses),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -64,8 +70,8 @@ fun GastosScreen(viewModel: GastosViewModel) {
 
             if (gastos.isEmpty()) {
                 EstadoVacio(
-                    mensaje = "No hay gastos",
-                    subMensaje = "Registra tu primer gasto pulsando el botón +",
+                    mensaje = stringResource(R.string.no_expenses),
+                    subMensaje = stringResource(R.string.register_first_expense),
                     icono = Icons.Default.MoneyOff
                 )
             } else {
@@ -87,10 +93,10 @@ fun GastosScreen(viewModel: GastosViewModel) {
         if (mostrarDialogo) {
             val gastosCategorias = categorias.filter { !it.esIngreso }
             AgregarGastoDialog(
-                categoriasDisponibles = if (gastosCategorias.isEmpty()) listOf("Varios") else gastosCategorias.map { it.nombre },
+                categoriasData = if (gastosCategorias.isEmpty()) listOf(Categoria(nombre = "Varios", esIngreso = false, iconoNombre = "ShoppingBag")) else gastosCategorias,
                 onDismiss = { mostrarDialogo = false },
-                onConfirm = { concepto, cantidad, categoria ->
-                    viewModel.agregarGasto(concepto, cantidad, System.currentTimeMillis(), categoria)
+                onConfirm = { concepto, cantidad, categoria, esFijo ->
+                    viewModel.agregarGasto(concepto, cantidad, System.currentTimeMillis(), categoria, esFijo)
                     mostrarDialogo = false
                 }
             )
@@ -99,19 +105,10 @@ fun GastosScreen(viewModel: GastosViewModel) {
 }
 
 @Composable
-fun GastoCard(gasto: Gasto, onDelete: () -> Unit) {
-    // Mapa de iconos básico
-    val iconosTemplate = mapOf(
-        "Sell" to Icons.Default.Sell,
-        "Build" to Icons.Default.Build,
-        "Restaurant" to Icons.Default.Restaurant,
-        "LocalGasStation" to Icons.Default.LocalGasStation,
-        "Tv" to Icons.Default.Tv,
-        "Work" to Icons.Default.Work,
-        "ShoppingBag" to Icons.Default.ShoppingBag,
-        "Payments" to Icons.Default.Payments,
-        "Home" to Icons.Default.Home
-    )
+fun GastoCard(gasto: Gasto, onDelete: () -> Unit, prefViewModel: PreferenciasViewModel = viewModel(), catViewModel: CategoriasViewModel = viewModel()) {
+    val categorias by catViewModel.categorias.collectAsState()
+    val categoriaData = categorias.find { it.nombre == gasto.categoria }
+    val icono = IconosCategoria.obtenerIcono(categoriaData?.iconoNombre)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -129,16 +126,27 @@ fun GastoCard(gasto: Gasto, onDelete: () -> Unit) {
                     .background(Color(0xFFFF5252).copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.ArrowDownward, contentDescription = null, tint = Color(0xFFFF5252))
+                Icon(imageVector = icono, contentDescription = null, tint = Color(0xFFFF5252))
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = gasto.concepto,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = gasto.concepto,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (gasto.esFijo) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            Icons.Default.PushPin,
+                            contentDescription = stringResource(R.string.fixed),
+                            modifier = Modifier.size(12.dp),
+                            tint = Color(0xFFFF5252)
+                        )
+                    }
+                }
                 Text(
                     text = SimpleDateFormat("dd MMM, h:mm a", Locale.getDefault()).format(Date(gasto.fecha)),
                     fontSize = 12.sp,
@@ -147,7 +155,7 @@ fun GastoCard(gasto: Gasto, onDelete: () -> Unit) {
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "-€${String.format(Locale.getDefault(), "%,.2f", gasto.cantidad)}",
+                    text = "-${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", gasto.cantidad)}",
                     color = Color(0xFFFF5252),
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -159,7 +167,7 @@ fun GastoCard(gasto: Gasto, onDelete: () -> Unit) {
                 )
             }
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Gray)
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Gray)
             }
         }
     }
@@ -167,52 +175,70 @@ fun GastoCard(gasto: Gasto, onDelete: () -> Unit) {
 
 @Composable
 fun AgregarGastoDialog(
-    categoriasDisponibles: List<String>,
-    onDismiss: () -> Unit, 
-    onConfirm: (String, Double, String) -> Unit
+    categoriasData: List<Categoria>,
+    onDismiss: () -> Unit,
+    onConfirm: (String, Double, String, Boolean) -> Unit
 ) {
     var concepto by remember { mutableStateOf("") }
     var cantidadStr by remember { mutableStateOf("") }
-    var categoriaSeleccionada by remember { mutableStateOf(categoriasDisponibles.first()) }
+    var categoriaSeleccionada by remember { mutableStateOf(categoriasData.first().nombre) }
+    var esFijo by remember { mutableStateOf(false) }
     val contexto = LocalContext.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nuevo Gasto") },
+        title = { Text(stringResource(R.string.new_expense)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextField(value = concepto, onValueChange = { concepto = it }, label = { Text("Concepto") })
-                TextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text("Cantidad") })
-                
-                Text("Selecciona Categoría:", fontWeight = FontWeight.Bold)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(value = concepto, onValueChange = { concepto = it }, label = { Text(stringResource(R.string.concept)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text(stringResource(R.string.amount)) }, modifier = Modifier.fillMaxWidth())
+
+                Text(stringResource(R.string.select_category), fontWeight = FontWeight.Bold)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(categoriasDisponibles) { cat ->
+                    items(categoriasData) { cat ->
                         FilterChip(
-                            selected = categoriaSeleccionada == cat,
-                            onClick = { categoriaSeleccionada = cat },
-                            label = { Text(cat) }
+                            selected = categoriaSeleccionada == cat.nombre,
+                            onClick = { categoriaSeleccionada = cat.nombre },
+                            label = { 
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = IconosCategoria.obtenerIcono(cat.iconoNombre),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(cat.nombre)
+                                }
+                            }
                         )
                     }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = esFijo, onCheckedChange = { esFijo = it })
+                    Text(stringResource(R.string.fixed_expense))
                 }
             }
         },
         confirmButton = {
-            Button(onClick = { 
+            Button(onClick = {
                 val cantidad = cantidadStr.toDoubleOrNull()
                 if (concepto.isBlank() || cantidadStr.isBlank()) {
-                    Toast.makeText(contexto, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(contexto, contexto.getString(R.string.all_fields_required), Toast.LENGTH_SHORT).show()
                 } else if (cantidad == null) {
-                    Toast.makeText(contexto, "La cantidad debe ser un número válido", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(contexto, contexto.getString(R.string.invalid_amount), Toast.LENGTH_SHORT).show()
                 } else {
-                    onConfirm(concepto, cantidad, categoriaSeleccionada)
+                    onConfirm(concepto, cantidad, categoriaSeleccionada, esFijo)
                 }
             }) {
-                Text("Agregar")
+                Text(stringResource(R.string.add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

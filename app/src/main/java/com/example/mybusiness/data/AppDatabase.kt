@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Trabajador::class, Cliente::class, Gasto::class, Ingreso::class, HistorialMes::class, Categoria::class], version = 4, exportSchema = false)
+@Database(entities = [Trabajador::class, Cliente::class, Gasto::class, Ingreso::class, HistorialMes::class, Categoria::class], version = 6, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun trabajadorDao(): TrabajadorDao
     abstract fun clienteDao(): ClienteDao
@@ -27,6 +27,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "my_business_database"
                 )
+                .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance

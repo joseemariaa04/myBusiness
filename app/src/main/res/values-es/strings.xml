@@ -1,0 +1,108 @@
+<resources>
+    <string name="app_name">myBusiness</string>
+
+    <!-- Navegación -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_staff">Personal</string>
+    <string name="nav_clients">Clientes</string>
+    <string name="nav_expenses">Gastos</string>
+    <string name="nav_income">Ingresos</string>
+
+    <!-- Pantalla de Inicio -->
+    <string name="current_monthly_profit">Beneficio Mensual Actual</string>
+    <string name="new_month">NUEVO MES</string>
+    <string name="categories">CATEGORÍAS</string>
+    <string name="history">HISTORIAL</string>
+    <string name="income">Ingresos</string>
+    <string name="expenses">Gastos</string>
+
+    <!-- Pantalla de Personal -->
+    <string name="staff_title">Personal</string>
+    <string name="search_name">Buscar por nombre...</string>
+    <string name="no_staff">No hay trabajadores</string>
+    <string name="no_staff_sub">Comienza agregando a tu primer empleado pulsando el botón +</string>
+    <string name="new_employee">Nuevo Trabajador</string>
+    <string name="name">Nombre</string>
+    <string name="position">Puesto</string>
+    <string name="phone">Teléfono</string>
+    <string name="email">Email</string>
+    <string name="add">Agregar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="all_fields_required">Todos los campos son obligatorios</string>
+
+    <!-- Pantalla de Clientes -->
+    <string name="clients_title">Clientes</string>
+    <string name="search_clients">Buscar por nombre o empresa...</string>
+    <string name="no_clients">No hay clientes</string>
+    <string name="no_clients_sub">Comienza agregando a tu primer cliente pulsando el botón +</string>
+    <string name="new_client">Nuevo Cliente</string>
+    <string name="contact_name">Nombre de Contacto</string>
+    <string name="company">Empresa</string>
+
+    <!-- Pantallas de Gastos/Ingresos -->
+    <string name="recent_expenses">Gastos recientes</string>
+    <string name="recent_income">Ingresos recientes</string>
+    <string name="no_expenses">No hay gastos</string>
+    <string name="no_income">No hay ingresos</string>
+    <string name="register_first_expense">Registra tu primer gasto pulsando el botón +</string>
+    <string name="register_first_income">Registra tu primer ingreso pulsando el botón +</string>
+    <string name="new_expense">Nuevo Gasto</string>
+    <string name="new_income_entry">Nuevo Ingreso</string>
+    <string name="concept">Concepto</string>
+    <string name="amount">Cantidad</string>
+    <string name="select_category">Selecciona Categoría:</string>
+    <string name="fixed_expense">Gasto Fijo (No se borra al cambiar de mes)</string>
+    <string name="fixed_income">Ingreso Fijo (No se borra al cambiar de mes)</string>
+    <string name="fixed">Fijo</string>
+    <string name="delete">Eliminar</string>
+    <string name="add_expense_desc">Agregar Gasto</string>
+    <string name="add_income_desc">Agregar Ingreso</string>
+    <string name="salario">Salario Mensual</string>
+    <string name="active">Activo</string>
+    <string name="inactive">Inactivo</string>
+    <string name="active_worker">Trabajador Activo</string>
+    <string name="call">Llamar</string>
+    <string name="send_email">Enviar Correo</string>
+    <string name="fill_all_fields">Por favor, rellena todos los campos correctamente</string>
+    <string name="add_worker_desc">Agregar Trabajador</string>
+    <string name="add_client_desc">Agregar Cliente</string>
+    <string name="invalid_email">El formato del email no es válido</string>
+    <string name="invalid_phone">El teléfono debe tener al menos 9 dígitos</string>
+    <string name="back">Volver</string>
+    <string name="settings">Configuración</string>
+    <string name="company_name">Nombre de la Empresa</string>
+    <string name="currency_symbol">Símbolo de Moneda:</string>
+    <string name="app_theme">Tema de la App:</string>
+    <string name="light">Claro</string>
+    <string name="dark">Oscuro</string>
+    <string name="system">Sistema</string>
+    <string name="auto_month_closure">Cierre de Mes Automático</string>
+    <string name="auto_month_closure_desc">Cerrar mes automáticamente el día 1</string>
+    <string name="save">Guardar</string>
+    <string name="close">Cerrar</string>
+    <string name="invalid_amount">La cantidad debe ser un número válido</string>
+
+    <!-- Cierre de Mes -->
+    <string name="close_month_title">Cerrar Mes Actual</string>
+    <string name="close_month_desc">Al cerrar el mes se moverá la información actual al historial e iniciará un nuevo periodo.</string>
+    <string name="month_name_label">Nombre del Mes</string>
+    <string name="confirm_restart">Confirmar y Reiniciar</string>
+    <string name="month_name_required">El nombre del mes es obligatorio</string>
+    <string name="month_closed_success">Mes \'%1$s\' cerrado correctamente y guardado en historial</string>
+    <string name="month_close_error">Error al cerrar el mes: %1$s</string>
+
+    <!-- Gestión de Categorías -->
+    <string name="manage_categories">Gestión de Categorías</string>
+    <string name="new_category">Nueva Categoría:</string>
+    <string name="choose_icon">Elige un icono:</string>
+    <string name="save_new">Guardar Nueva</string>
+    <string name="saved_categories">Categorías Guardadas:</string>
+    <string name="category_name_required">Escribe un nombre para la categoría</string>
+    <string name="category_added">Categoría añadida</string>
+
+    <!-- Detalle de Mes -->
+    <string name="month_detail_title">Detalle: %1$s</string>
+    <string name="movements_summary">Resumen de Movimientos</string>
+    <string name="no_income_this_month">No hay ingresos registrados este mes.</string>
+    <string name="no_expenses_this_month">No hay gastos registrados este mes.</string>
+</resources>

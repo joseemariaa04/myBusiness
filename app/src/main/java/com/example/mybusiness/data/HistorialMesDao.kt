@@ -11,5 +11,5 @@ interface HistorialMesDao {
     fun obtenerTodoElHistorial(): Flow<List<HistorialMes>>
 
     @Insert
-    suspend fun insertar(historialMes: HistorialMes)
+    suspend fun insertar(historialMes: HistorialMes): Long
 }

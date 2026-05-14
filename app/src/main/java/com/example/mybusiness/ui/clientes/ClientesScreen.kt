@@ -26,6 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.mybusiness.R
 import com.example.mybusiness.data.Cliente
 import com.example.mybusiness.ui.AnimacionEntradaLista
 import com.example.mybusiness.ui.EstadoVacio
@@ -47,7 +49,7 @@ fun ClientesScreen(viewModel: ClientesViewModel) {
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar Cliente")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_client_desc))
             }
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -59,7 +61,7 @@ fun ClientesScreen(viewModel: ClientesViewModel) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Clientes",
+                text = stringResource(R.string.clients_title),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -73,7 +75,7 @@ fun ClientesScreen(viewModel: ClientesViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                placeholder = { Text("Buscar por nombre o empresa...") },
+                placeholder = { Text(stringResource(R.string.search_clients)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -84,8 +86,8 @@ fun ClientesScreen(viewModel: ClientesViewModel) {
 
             if (clientesFiltrados.isEmpty()) {
                 EstadoVacio(
-                    mensaje = "No hay clientes",
-                    subMensaje = "Comienza agregando a tu primer cliente pulsando el botón +",
+                    mensaje = stringResource(R.string.no_clients),
+                    subMensaje = stringResource(R.string.no_clients_sub),
                     icono = Icons.Default.BusinessCenter
                 )
             } else {
@@ -153,7 +155,7 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
                             shape = RoundedCornerShape(4.dp)
                         ) {
                             Text(
-                                text = "Activo",
+                                text = stringResource(R.string.active),
                                 color = Color(0xFF4CAF50),
                                 fontSize = 10.sp,
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
@@ -172,7 +174,7 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
                     }
                     context.startActivity(intent)
                 }) {
-                    Icon(Icons.Default.Phone, contentDescription = "Llamar", tint = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.Default.Phone, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
                 }
                 IconButton(onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
@@ -180,10 +182,10 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
                     }
                     context.startActivity(intent)
                 }) {
-                    Icon(Icons.Default.Email, contentDescription = "Enviar Correo", tint = MaterialTheme.colorScheme.secondary)
+                    Icon(Icons.Default.Email, contentDescription = stringResource(R.string.send_email), tint = MaterialTheme.colorScheme.secondary)
                 }
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Gray)
+                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Gray)
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -201,29 +203,37 @@ fun AgregarClienteDialog(onDismiss: () -> Unit, onConfirm: (String, String, Stri
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nuevo Cliente") },
+        title = { Text(stringResource(R.string.new_client)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre de Contacto") })
-                TextField(value = empresa, onValueChange = { empresa = it }, label = { Text("Empresa") })
-                TextField(value = telefono, onValueChange = { telefono = it }, label = { Text("Teléfono") })
-                TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text(stringResource(R.string.contact_name)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = empresa, onValueChange = { empresa = it }, label = { Text(stringResource(R.string.company)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = telefono, onValueChange = { telefono = it }, label = { Text(stringResource(R.string.phone)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text(stringResource(R.string.email)) }, modifier = Modifier.fillMaxWidth())
             }
         },
         confirmButton = {
-            Button(onClick = { 
+            Button(onClick = {
+                val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$".toRegex()
                 if (nombre.isBlank() || empresa.isBlank() || telefono.isBlank() || email.isBlank()) {
-                    Toast.makeText(context, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.all_fields_required), Toast.LENGTH_SHORT).show()
+                } else if (!email.matches(emailRegex)) {
+                    Toast.makeText(context, context.getString(R.string.invalid_email), Toast.LENGTH_SHORT).show()
+                } else if (telefono.length < 9) {
+                    Toast.makeText(context, context.getString(R.string.invalid_phone), Toast.LENGTH_SHORT).show()
                 } else {
                     onConfirm(nombre, empresa, telefono, email)
                 }
             }) {
-                Text("Agregar")
+                Text(stringResource(R.string.add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
