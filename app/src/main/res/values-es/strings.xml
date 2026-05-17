@@ -82,6 +82,9 @@
     <string name="system">Sistema</string>
     <string name="auto_month_closure">Cierre de Mes Automático</string>
     <string name="auto_month_closure_desc">Cerrar mes automáticamente el día 1</string>
+    <string name="auto_month_closure_info">El cierre de mes es automático cada primer día del mes.</string>
+    <string name="no_history_data">Aún no hay datos históricos para la gráfica</string>
+    <string name="annual_performance">Rendimiento Anual</string>
     <string name="save">Guardar</string>
     <string name="close">Cerrar</string>
     <string name="invalid_amount">La cantidad debe ser un número válido</string>

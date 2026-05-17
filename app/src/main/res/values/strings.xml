@@ -82,6 +82,9 @@
     <string name="system">System</string>
     <string name="auto_month_closure">Auto Month Closure</string>
     <string name="auto_month_closure_desc">Close month automatically on the 1st</string>
+    <string name="auto_month_closure_info">Month closure is automatic on the first day of each month.</string>
+    <string name="no_history_data">No historical data available for the chart yet</string>
+    <string name="annual_performance">Annual Performance</string>
     <string name="save">Save</string>
     <string name="close">Close</string>
     <string name="invalid_amount">The amount must be a valid number</string>

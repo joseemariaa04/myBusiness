@@ -243,29 +243,12 @@ fun DialogoConfiguracion(
 
                 HorizontalDivider()
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.auto_month_closure), fontWeight = FontWeight.Bold)
-                        Text(
-                            stringResource(R.string.auto_month_closure_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = prefViewModel.cierreAutomatico,
-                        onCheckedChange = { 
-                            prefViewModel.guardarCierreAutomatico(it)
-                            if (it) {
-                                inicioViewModel.comprobarCierreMesAutomatico()
-                            }
-                        }
-                    )
-                }
+                Text(
+                    text = stringResource(R.string.auto_month_closure_info),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
         },
         confirmButton = {
