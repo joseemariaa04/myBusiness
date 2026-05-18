@@ -7,7 +7,6 @@
     <string name="nav_clients">Clientes</string>
     <string name="nav_expenses">Gastos</string>
     <string name="nav_income">Ingresos</string>
-    <string name="nav_chat">Asistente IA</string>
 
     <!-- Pantalla de Inicio -->
     <string name="current_monthly_profit">Beneficio Mensual Actual</string>
@@ -50,7 +49,7 @@
     <string name="new_expense">Nuevo Gasto</string>
     <string name="new_income_entry">Nuevo Ingreso</string>
     <string name="concept">Concepto</string>
-    <string name="salary">Salario:</string>
+    <string name="salary">Cantidad</string>
     <string name="select_category">Selecciona Categoría:</string>
     <string name="fixed_expense">Gasto Fijo (No se borra al cambiar de mes)</string>
     <string name="fixed_income">Ingreso Fijo (No se borra al cambiar de mes)</string>
@@ -59,6 +58,9 @@
     <string name="delete_confirm_title">Confirmar eliminación</string>
     <string name="delete_worker_confirm_desc">¿Estás seguro de que deseas eliminar al trabajador %1$s? Esta acción no se puede deshacer.</string>
     <string name="delete_client_confirm_desc">¿Estás seguro de que deseas eliminar al cliente %1$s? Esta acción no se puede deshacer.</string>
+    <string name="delete_expense_confirm_desc">¿Estás seguro de que deseas eliminar el gasto \'%1$s\'? Esta acción no se puede deshacer.</string>
+    <string name="delete_income_confirm_desc">¿Estás seguro de que deseas eliminar el ingreso \'%1$s\'? Esta acción no se puede deshacer.</string>
+    <string name="delete_category_confirm_desc">¿Estás seguro de que deseas eliminar la categoría \'%1$s\'? Esta acción no se puede deshacer.</string>
     <string name="add_expense_desc">Agregar Gasto</string>
     <string name="add_income_desc">Agregar Ingreso</string>
     <string name="salario">Salario Mensual</string>
@@ -113,4 +115,13 @@
     <string name="movements_summary">Resumen de Movimientos</string>
     <string name="no_income_this_month">No hay ingresos registrados este mes.</string>
     <string name="no_expenses_this_month">No hay gastos registrados este mes.</string>
+
+    <!-- Pantalla de Chat -->
+    <string name="mensaje_IA">¡Hola! Soy Buzzy, tu asistente de myBusiness. ¿En qué puedo ayudarte hoy?</string>
+    <string name="chat_placeholder">Pregunta algo sobre tu negocio...</string>
+    <string name="send_message">Enviar mensaje</string>
+    <string name="ai_context_company">Empresa</string>
+    <string name="ai_context_description">Descripción</string>
+    <string name="ai_context_current_month_data">Datos mes actual:</string>
+    <string name="ai_system_prompt">Eres el asistente inteligente de myBusiness. Ayuda con contabilidad y gestión de forma breve. Responde en el idioma en que el usuario pregunte. Contexto actual: %1$s</string>
 </resources>

@@ -46,6 +46,7 @@ fun GastosScreen(controladorGastos: GastosViewModel, controladorPreferencias: Pr
     
     // Para saber si tenemos que enseñar el cuadro de "Añadir nuevo"
     var mostrarCuadroNuevo by remember { mutableStateOf(false) }
+    var gastoABorrar by remember { mutableStateOf<Gasto?>(null) }
 
     Scaffold(
         floatingActionButton = {
@@ -90,7 +91,7 @@ fun GastosScreen(controladorGastos: GastosViewModel, controladorPreferencias: Pr
                         AnimacionEntradaLista(indice = indice) {
                             TarjetaDeGasto(
                                 elGasto = unGasto as Gasto,
-                                alBorrar = { controladorGastos.borrarGasto(unGasto as Gasto) },
+                                alBorrar = { gastoABorrar = unGasto as Gasto },
                                 pref = controladorPreferencias
                             )
                         }
@@ -109,6 +110,31 @@ fun GastosScreen(controladorGastos: GastosViewModel, controladorPreferencias: Pr
                 alGuardar = { concepto, dinero, categoria, esFijo ->
                     controladorGastos.apuntarNuevoGasto(concepto, dinero, System.currentTimeMillis(), categoria, esFijo)
                     mostrarCuadroNuevo = false
+                }
+            )
+        }
+
+        // Diálogo de confirmación para borrar
+        if (gastoABorrar != null) {
+            AlertDialog(
+                onDismissRequest = { gastoABorrar = null },
+                title = { Text(stringResource(R.string.delete_confirm_title)) },
+                text = { Text(stringResource(R.string.delete_expense_confirm_desc, gastoABorrar?.concepto ?: "")) },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            gastoABorrar?.let { controladorGastos.borrarGasto(it) }
+                            gastoABorrar = null
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text(stringResource(R.string.delete))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { gastoABorrar = null }) {
+                        Text(stringResource(R.string.cancel))
+                    }
                 }
             )
         }

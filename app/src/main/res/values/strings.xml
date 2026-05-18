@@ -5,9 +5,9 @@
     <string name="nav_home">Home</string>
     <string name="nav_staff">Staff</string>
     <string name="nav_clients">Clients</string>
-    <string name="nav_expenses">Expenses</string>
+    <string name="nav_expenses">Expense</string>
     <string name="nav_income">Income</string>
-    <string name="nav_chat">AI Assistant</string>
+    <string name="nav_chat" translatable="false">Buzzy</string>
 
     <!-- Home Screen -->
     <string name="current_monthly_profit">Current Monthly Profit</string>
@@ -59,6 +59,9 @@
     <string name="delete_confirm_title">Confirm Deletion</string>
     <string name="delete_worker_confirm_desc">Are you sure you want to delete worker %1$s? This action cannot be undone.</string>
     <string name="delete_client_confirm_desc">Are you sure you want to delete client %1$s? This action cannot be undone.</string>
+    <string name="delete_expense_confirm_desc">Are you sure you want to delete the expense \'%1$s\'? This action cannot be undone.</string>
+    <string name="delete_income_confirm_desc">Are you sure you want to delete the income \'%1$s\'? This action cannot be undone.</string>
+    <string name="delete_category_confirm_desc">Are you sure you want to delete the category \'%1$s\'? This action cannot be undone.</string>
     <string name="add_expense_desc">Add Expense</string>
     <string name="add_income_desc">Add Income</string>
     <string name="salario">Monthly Salary</string>
@@ -113,4 +116,13 @@
     <string name="movements_summary">Movements Summary</string>
     <string name="no_income_this_month">No income registered this month.</string>
     <string name="no_expenses_this_month">No expenses registered this month.</string>
+
+    <!-- Chat Screen -->
+    <string name="mensaje_IA">Hello! I\'m Buzzy, your myBusiness AI assistant. How can I help you today?</string>
+    <string name="chat_placeholder">Ask something about your business...</string>
+    <string name="send_message">Send message</string>
+    <string name="ai_context_company">Company</string>
+    <string name="ai_context_description">Description</string>
+    <string name="ai_context_current_month_data">Current month data:</string>
+    <string name="ai_system_prompt">You are the intelligent assistant of myBusiness. Help with accounting and management briefly. Respond in the language the user asks. Current context: %1$s</string>
 </resources>

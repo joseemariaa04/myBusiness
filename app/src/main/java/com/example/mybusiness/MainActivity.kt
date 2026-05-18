@@ -44,6 +44,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +55,14 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -150,7 +160,8 @@ fun MainApp(prefViewModel: PreferenciasViewModel) {
                     viewModel = inicioViewModel,
                     onVerDetalleMes = { id, nombre ->
                         navController.navigate("detalle_mes/$id/$nombre")
-                    }
+                    },
+                    prefViewModel = prefViewModel
                 )
             }
             composable(Screen.Gastos.route) { GastosScreen(controladorGastos = gastosViewModel, controladorPreferencias = prefViewModel) }
@@ -202,13 +213,22 @@ fun DialogoConfiguracion(
 ) {
     var nombreTmp by remember { mutableStateOf(prefViewModel.nombreEmpresa) }
     var descripcionTmp by remember { mutableStateOf(prefViewModel.descripcionEmpresa) }
+    var monedaTmp by remember { mutableStateOf(prefViewModel.simboloMoneda) }
+    var modoOscuroTmp by remember { mutableStateOf(prefViewModel.modoOscuro) }
+    
+    val scrollState = rememberScrollState()
     val monedas = listOf("€", "$", "£", "¥", "MXN")
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.settings)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 OutlinedTextField(
                     value = nombreTmp,
                     onValueChange = { nombreTmp = it },
@@ -228,8 +248,8 @@ fun DialogoConfiguracion(
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(monedas) { simbolo ->
                         FilterChip(
-                            selected = prefViewModel.simboloMoneda == simbolo,
-                            onClick = { prefViewModel.guardarSimboloMoneda(simbolo) },
+                            selected = monedaTmp == simbolo,
+                            onClick = { monedaTmp = simbolo },
                             label = { Text(simbolo) }
                         )
                     }
@@ -241,18 +261,18 @@ fun DialogoConfiguracion(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     FilterChip(
-                        selected = prefViewModel.modoOscuro == false,
-                        onClick = { prefViewModel.guardarModoOscuro(false) },
+                        selected = modoOscuroTmp == false,
+                        onClick = { modoOscuroTmp = false },
                         label = { Text(stringResource(R.string.light)) }
                     )
                     FilterChip(
-                        selected = prefViewModel.modoOscuro == true,
-                        onClick = { prefViewModel.guardarModoOscuro(true) },
+                        selected = modoOscuroTmp == true,
+                        onClick = { modoOscuroTmp = true },
                         label = { Text(stringResource(R.string.dark)) }
                     )
                     FilterChip(
-                        selected = prefViewModel.modoOscuro == null,
-                        onClick = { prefViewModel.guardarModoOscuro(null) },
+                        selected = modoOscuroTmp == null,
+                        onClick = { modoOscuroTmp = null },
                         label = { Text(stringResource(R.string.system)) }
                     )
                 }
@@ -271,6 +291,8 @@ fun DialogoConfiguracion(
             Button(onClick = {
                 prefViewModel.guardarNombreEmpresa(nombreTmp)
                 prefViewModel.guardarDescripcionEmpresa(descripcionTmp)
+                prefViewModel.guardarSimboloMoneda(monedaTmp)
+                prefViewModel.guardarModoOscuro(modoOscuroTmp)
                 onDismiss()
             }) {
                 Text(stringResource(R.string.save))

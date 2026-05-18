@@ -56,7 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 fun InicioScreen(
     viewModel: InicioViewModel,
     onVerDetalleMes: (Int, String) -> Unit,
-    prefViewModel: PreferenciasViewModel = viewModel()
+    prefViewModel: PreferenciasViewModel
 ) {
     val estado by viewModel.estado.collectAsState()
     val contexto = LocalContext.current
@@ -191,6 +191,7 @@ fun InicioScreen(
                     colorIcono = MaterialTheme.colorScheme.primary,
                     variacion = varIngresos,
                     modifier = Modifier.weight(1.0f),
+                    prefViewModel = prefViewModel,
                     onClick = { 
                         desgloseATostrar = tituloIngresos to estado.desglosePorCategoriasIngresos 
                     }
@@ -203,6 +204,7 @@ fun InicioScreen(
                     variacion = varGastos,
                     inverso = true,
                     modifier = Modifier.weight(1.0f),
+                    prefViewModel = prefViewModel,
                     onClick = { 
                         desgloseATostrar = tituloGastos to estado.desglosePorCategoriasGastos
                     }
@@ -233,7 +235,7 @@ fun InicioScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 
-                GraficaBeneficios(historial = historial)
+                GraficaBeneficios(historial = historial, prefViewModel = prefViewModel)
             }
         }
 
@@ -247,7 +249,7 @@ fun InicioScreen(
         }
 
         items(historial) { mes ->
-            HistorialCard(mes, onClick = { onVerDetalleMes(mes.id, mes.nombreMes) })
+            HistorialCard(mes, onClick = { onVerDetalleMes(mes.id, mes.nombreMes) }, prefViewModel = prefViewModel)
         }
         
         item {
@@ -306,6 +308,7 @@ fun DialogoGestionCategorias(
     var nombreCat by remember { mutableStateOf("") }
     var tipoIngreso by remember { mutableStateOf(true) }
     var iconoSeleccionado by remember { mutableStateOf("Sell") }
+    var categoriaABorrar by remember { mutableStateOf<Categoria?>(null) }
     val contexto = LocalContext.current
 
     // Mapa de iconos centralizado
@@ -391,7 +394,7 @@ fun DialogoGestionCategorias(
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(cat.nombre, fontSize = 14.sp)
                                 }
-                                IconButton(onClick = { onEliminar(cat) }) {
+                                IconButton(onClick = { categoriaABorrar = cat }) {
                                     Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(20.dp))
                                 }
                             }
@@ -404,10 +407,34 @@ fun DialogoGestionCategorias(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
+
+    if (categoriaABorrar != null) {
+        AlertDialog(
+            onDismissRequest = { categoriaABorrar = null },
+            title = { Text(stringResource(R.string.delete_confirm_title)) },
+            text = { Text(stringResource(R.string.delete_category_confirm_desc, categoriaABorrar?.nombre ?: "")) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        categoriaABorrar?.let { onEliminar(it) }
+                        categoriaABorrar = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { categoriaABorrar = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 }
 
 @Composable
-fun HistorialCard(mes: HistorialMes, onClick: () -> Unit, prefViewModel: PreferenciasViewModel = viewModel()) {
+fun HistorialCard(mes: HistorialMes, onClick: () -> Unit, prefViewModel: PreferenciasViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -451,6 +478,18 @@ fun HistorialCard(mes: HistorialMes, onClick: () -> Unit, prefViewModel: Prefere
 
 @Preview(showBackground = true)
 @Composable
+fun InicioScreenPreview() {
+    MaterialTheme {
+        InicioScreen(
+            viewModel = viewModel(),
+            onVerDetalleMes = { _, _ -> },
+            prefViewModel = viewModel()
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 fun GraficaBeneficiosPreview() {
     val historialFicticio = listOf(
         HistorialMes(1, "Enero", 5000.0, 3000.0, 2000.0, 1640995200000L),
@@ -469,13 +508,15 @@ fun GraficaBeneficiosPreview() {
     )
     MaterialTheme {
         Surface(modifier = Modifier.padding(16.dp)) {
-            GraficaBeneficios(historial = historialFicticio)
+            // Pasamos un prefViewModel nulo o mockeado para el preview si es necesario, 
+            // o simplemente usamos viewModel() ya que en preview puede funcionar si no requiere contexto real
+            GraficaBeneficios(historial = historialFicticio, prefViewModel = viewModel())
         }
     }
 }
 
 @Composable
-fun GraficaBeneficios(historial: List<HistorialMes>, prefViewModel: PreferenciasViewModel = viewModel()) {
+fun GraficaBeneficios(historial: List<HistorialMes>, prefViewModel: PreferenciasViewModel) {
     val ultimosMeses = if (historial.size > 12) {
         historial.take(12).reversed()
     } else {
@@ -614,7 +655,7 @@ fun ResumenCard(
     variacion: Double? = null,
     inverso: Boolean = false,
     onClick: (() -> Unit)? = null,
-    prefViewModel: PreferenciasViewModel = viewModel()
+    prefViewModel: PreferenciasViewModel
 ) {
     Card(
         modifier = modifier

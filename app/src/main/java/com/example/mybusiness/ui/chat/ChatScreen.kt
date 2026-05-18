@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,15 +44,28 @@ fun ChatScreen(
     val estadoDeLaLista = rememberLazyListState()
 
     // Preparamos el "chuletero" para la IA con los datos de nuestra empresa
+    val contextCompany = stringResource(R.string.ai_context_company)
+    val contextDescription = stringResource(R.string.ai_context_description)
+    val contextData = stringResource(R.string.ai_context_current_month_data)
+    val labelIncome = stringResource(R.string.income)
+    val labelExpenses = stringResource(R.string.expenses)
+    val labelProfit = stringResource(R.string.current_monthly_profit)
+
     val informacionDeLaEmpresa = remember(estadoDelNegocio, controladorDePreferencias.descripcionEmpresa) {
         """
-            Empresa: ${controladorDePreferencias.nombreEmpresa}
-            Descripción: ${controladorDePreferencias.descripcionEmpresa}
-            Datos mes actual:
-            - Ingresos: ${estadoDelNegocio.ingresosTotales} ${controladorDePreferencias.simboloMoneda}
-            - Gastos: ${estadoDelNegocio.gastosTotales} ${controladorDePreferencias.simboloMoneda}
-            - Beneficio: ${estadoDelNegocio.beneficioMensual} ${controladorDePreferencias.simboloMoneda}
+            $contextCompany: ${controladorDePreferencias.nombreEmpresa}
+            $contextDescription: ${controladorDePreferencias.descripcionEmpresa}
+            $contextData
+            - $labelIncome: ${estadoDelNegocio.ingresosTotales} ${controladorDePreferencias.simboloMoneda}
+            - $labelExpenses: ${estadoDelNegocio.gastosTotales} ${controladorDePreferencias.simboloMoneda}
+            - $labelProfit: ${estadoDelNegocio.beneficioMensual} ${controladorDePreferencias.simboloMoneda}
         """.trimIndent()
+    }
+
+    // Al iniciar la pantalla, cargamos el mensaje de bienvenida si no hay mensajes
+    val mensajeBienvenida = stringResource(R.string.mensaje_IA)
+    LaunchedEffect(Unit) {
+        controladorDelChat.inicializarChat(mensajeBienvenida)
     }
 
     // Si la lista de mensajes cambia (porque mandamos uno), bajamos hasta el último
@@ -96,7 +110,7 @@ fun ChatScreen(
                 value = textoEscritoPorElUsuario,
                 onValueChange = { textoEscritoPorElUsuario = it },
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("Pregunta algo sobre tu negocio...") },
+                placeholder = { Text(stringResource(R.string.chat_placeholder)) },
                 shape = RoundedCornerShape(24.dp),
                 maxLines = 3
             )
@@ -104,7 +118,7 @@ fun ChatScreen(
             IconButton(
                 onClick = {
                     if (textoEscritoPorElUsuario.isNotBlank()) {
-                        // Le decimos al controlador que mande el mensaje
+                        // Pasamos también el prompt del sistema traducido
                         controladorDelChat.enviarMensaje(textoEscritoPorElUsuario, informacionDeLaEmpresa)
                         // Borramos el texto para poder escribir otro nuevo
                         textoEscritoPorElUsuario = ""
@@ -116,7 +130,7 @@ fun ChatScreen(
                     contentColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Icon(Icons.Default.Send, contentDescription = "Enviar mensaje")
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.send_message))
             }
         }
     }

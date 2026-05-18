@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +49,7 @@ fun IngresosScreen(controladorIngresos: IngresosViewModel, controladorPreferenci
     
     // Para saber si tenemos que enseñar el cuadro de "Añadir nuevo"
     var mostrarCuadroNuevo by remember { mutableStateOf(false) }
+    var ingresoABorrar by remember { mutableStateOf<Ingreso?>(null) }
 
     Scaffold(
         floatingActionButton = {
@@ -91,7 +94,7 @@ fun IngresosScreen(controladorIngresos: IngresosViewModel, controladorPreferenci
                         AnimacionEntradaLista(indice = indice) {
                             TarjetaDeIngreso(
                                 elIngreso = unIngreso as Ingreso,
-                                alBorrar = { controladorIngresos.borrarIngreso(unIngreso as Ingreso) },
+                                alBorrar = { ingresoABorrar = unIngreso as Ingreso },
                                 pref = controladorPreferencias
                             )
                         }
@@ -110,6 +113,31 @@ fun IngresosScreen(controladorIngresos: IngresosViewModel, controladorPreferenci
                 alGuardar = { concepto, dinero, categoria, esFijo ->
                     controladorIngresos.apuntarNuevoIngreso(concepto, dinero, System.currentTimeMillis(), categoria, esFijo)
                     mostrarCuadroNuevo = false
+                }
+            )
+        }
+
+        // Diálogo de confirmación para borrar
+        if (ingresoABorrar != null) {
+            AlertDialog(
+                onDismissRequest = { ingresoABorrar = null },
+                title = { Text(stringResource(R.string.delete_confirm_title)) },
+                text = { Text(stringResource(R.string.delete_income_confirm_desc, ingresoABorrar?.concepto ?: "")) },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            ingresoABorrar?.let { controladorIngresos.borrarIngreso(it) }
+                            ingresoABorrar = null
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text(stringResource(R.string.delete))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { ingresoABorrar = null }) {
+                        Text(stringResource(R.string.cancel))
+                    }
                 }
             )
         }

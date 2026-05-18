@@ -33,6 +33,8 @@ import com.example.mybusiness.data.Trabajador
 import com.example.mybusiness.ui.AnimacionEntradaLista
 import com.example.mybusiness.ui.EstadoVacio
 
+import androidx.compose.ui.text.style.TextOverflow
+
 // Esta pantalla sirve para ver quién trabaja con nosotros y añadir gente nueva
 @Composable
 fun TrabajadoresScreen(controladorTrabajadores: TrabajadoresViewModel) {
@@ -184,29 +186,32 @@ fun TarjetaDeEmpleado(empleado: Trabajador, alCambiarEstado: () -> Unit, alBorra
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = empleado.nombre,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    // Botón pequeño para ver si está trabajando o no, ahora en su propia línea
+                    val colorEstado = if (empleado.activo) Color(0xFF4CAF50) else Color.Gray
+                    Surface(
+                        color = colorEstado.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(4.dp),
+                        onClick = alCambiarEstado,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
                         Text(
-                            text = empleado.nombre,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurface
+                            text = if (empleado.activo) stringResource(R.string.active) else stringResource(R.string.inactive),
+                            color = colorEstado,
+                            fontSize = 10.sp,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            maxLines = 1
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        // Botón pequeño para ver si está trabajando o no
-                        val colorEstado = if (empleado.activo) Color(0xFF4CAF50) else Color.Gray
-                        Surface(
-                            color = colorEstado.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(4.dp),
-                            onClick = alCambiarEstado
-                        ) {
-                            Text(
-                                text = if (empleado.activo) stringResource(R.string.active) else stringResource(R.string.inactive),
-                                color = colorEstado,
-                                fontSize = 10.sp,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
                     }
+
                     Text(
                         text = "${empleado.puesto} • ${stringResource(R.string.salary)}: ${empleado.salario}",
                         fontSize = 14.sp,
