@@ -33,21 +33,27 @@ import com.example.mybusiness.data.Trabajador
 import com.example.mybusiness.ui.AnimacionEntradaLista
 import com.example.mybusiness.ui.EstadoVacio
 
+// Esta pantalla sirve para ver quién trabaja con nosotros y añadir gente nueva
 @Composable
-fun TrabajadoresScreen(viewModel: TrabajadoresViewModel) {
-    val trabajadores by viewModel.trabajadores.collectAsState()
-    var mostrarDialogo by remember { mutableStateOf(false) }
-    var trabajadorAEliminar by remember { mutableStateOf<Trabajador?>(null) }
-    var textoBusqueda by remember { mutableStateOf("") }
+fun TrabajadoresScreen(controladorTrabajadores: TrabajadoresViewModel) {
+    // Escuchamos la lista de empleados que nos da el controlador
+    val listaActualTrabajadores by controladorTrabajadores.listaDeTrabajadores.collectAsState()
+    
+    // Estados para controlar los diálogos y la búsqueda
+    var mostrarCuadroNuevo by remember { mutableStateOf(false) }
+    var empleadoABorrar by remember { mutableStateOf<Trabajador?>(null) }
+    var textoABuscar by remember { mutableStateOf("") }
 
-    val trabajadoresFiltrados = trabajadores.filter {
-        it.nombre.contains(textoBusqueda, ignoreCase = true)
+    // Filtramos la lista según lo que hayamos escrito en el buscador
+    val trabajadoresFiltrados = listaActualTrabajadores.filter {
+        it.nombre.contains(textoABuscar, ignoreCase = true)
     }
 
     Scaffold(
         floatingActionButton = {
+            // Botón "+" para contratar a alguien nuevo
             FloatingActionButton(
-                onClick = { mostrarDialogo = true },
+                onClick = { mostrarCuadroNuevo = true },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -70,10 +76,10 @@ fun TrabajadoresScreen(viewModel: TrabajadoresViewModel) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Barra de Búsqueda
+            // Barra de Búsqueda para encontrar a alguien rápido por su nombre
             OutlinedTextField(
-                value = textoBusqueda,
-                onValueChange = { textoBusqueda = it },
+                value = textoABuscar,
+                onValueChange = { textoABuscar = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
@@ -86,6 +92,7 @@ fun TrabajadoresScreen(viewModel: TrabajadoresViewModel) {
                 )
             )
 
+            // Si no hay nadie que coincida con la búsqueda, enseñamos el aviso de "Vacío"
             if (trabajadoresFiltrados.isEmpty()) {
                 EstadoVacio(
                     mensaje = stringResource(R.string.no_staff),
@@ -93,17 +100,19 @@ fun TrabajadoresScreen(viewModel: TrabajadoresViewModel) {
                     icono = Icons.Default.Group
                 )
             } else {
+                // Si hay gente, los ponemos en una lista
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    itemsIndexed(trabajadoresFiltrados) { indice, trabajador ->
+                    itemsIndexed(trabajadoresFiltrados) { indice, unEmpleado ->
                         AnimacionEntradaLista(indice = indice) {
-                            TrabajadorCard(
-                                trabajador = trabajador,
-                                onToggleActivo = { 
-                                    viewModel.actualizarTrabajador(trabajador.copy(activo = !trabajador.activo))
+                            TarjetaDeEmpleado(
+                                empleado = unEmpleado as Trabajador,
+                                alCambiarEstado = { 
+                                    // Si pulsamos el estado, cambia entre Activo e Inactivo
+                                    controladorTrabajadores.actualizarDatosTrabajador((unEmpleado as Trabajador).copy(activo = !unEmpleado.activo))
                                 },
-                                onDelete = { trabajadorAEliminar = trabajador }
+                                alBorrar = { empleadoABorrar = unEmpleado as Trabajador }
                             )
                         }
                     }
@@ -111,16 +120,17 @@ fun TrabajadoresScreen(viewModel: TrabajadoresViewModel) {
             }
         }
 
-        if (trabajadorAEliminar != null) {
+        // Aviso de confirmación antes de borrar a un trabajador
+        if (empleadoABorrar != null) {
             AlertDialog(
-                onDismissRequest = { trabajadorAEliminar = null },
+                onDismissRequest = { empleadoABorrar = null },
                 title = { Text(stringResource(R.string.delete_confirm_title)) },
-                text = { Text(stringResource(R.string.delete_worker_confirm_desc, trabajadorAEliminar?.nombre ?: "")) },
+                text = { Text(stringResource(R.string.delete_worker_confirm_desc, empleadoABorrar?.nombre ?: "")) },
                 confirmButton = {
                     Button(
                         onClick = {
-                            trabajadorAEliminar?.let { viewModel.eliminarTrabajador(it) }
-                            trabajadorAEliminar = null
+                            empleadoABorrar?.let { controladorTrabajadores.borrarTrabajador(it) }
+                            empleadoABorrar = null
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
@@ -128,28 +138,30 @@ fun TrabajadoresScreen(viewModel: TrabajadoresViewModel) {
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { trabajadorAEliminar = null }) {
+                    TextButton(onClick = { empleadoABorrar = null }) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
             )
         }
 
-        if (mostrarDialogo) {
-            AgregarTrabajadorDialog(
-                onDismiss = { mostrarDialogo = false },
-                onConfirm = { nombre, puesto, telefono, email, salario, activo ->
-                    viewModel.agregarTrabajador(nombre, puesto, telefono, email, salario, activo)
-                    mostrarDialogo = false
+        // El formulario para meter los datos de un nuevo trabajador
+        if (mostrarCuadroNuevo) {
+            DialogoParaContratar(
+                alCerrar = { mostrarCuadroNuevo = false },
+                alGuardar = { nombre, puesto, tel, mail, sueldo, estaActivo ->
+                    controladorTrabajadores.contratarTrabajador(nombre, puesto, tel, mail, sueldo, estaActivo)
+                    mostrarCuadroNuevo = false
                 }
             )
         }
     }
 }
 
+// Así es como se ve la tarjeta con la información de un empleado
 @Composable
-fun TrabajadorCard(trabajador: Trabajador, onToggleActivo: () -> Unit, onDelete: () -> Unit) {
-    val context = LocalContext.current
+fun TarjetaDeEmpleado(empleado: Trabajador, alCambiarEstado: () -> Unit, alBorrar: () -> Unit) {
+    val contexto = LocalContext.current
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -160,6 +172,7 @@ fun TrabajadorCard(trabajador: Trabajador, onToggleActivo: () -> Unit, onDelete:
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Un redondel con el icono de una persona
                 Box(
                     modifier = Modifier
                         .size(48.dp)
@@ -173,49 +186,53 @@ fun TrabajadorCard(trabajador: Trabajador, onToggleActivo: () -> Unit, onDelete:
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = trabajador.nombre,
+                            text = empleado.nombre,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        val statusColor = if (trabajador.activo) Color(0xFF4CAF50) else Color.Gray
+                        // Botón pequeño para ver si está trabajando o no
+                        val colorEstado = if (empleado.activo) Color(0xFF4CAF50) else Color.Gray
                         Surface(
-                            color = statusColor.copy(alpha = 0.1f),
+                            color = colorEstado.copy(alpha = 0.1f),
                             shape = RoundedCornerShape(4.dp),
-                            onClick = onToggleActivo
+                            onClick = alCambiarEstado
                         ) {
                             Text(
-                                text = if (trabajador.activo) stringResource(R.string.active) else stringResource(R.string.inactive),
-                                color = statusColor,
+                                text = if (empleado.activo) stringResource(R.string.active) else stringResource(R.string.inactive),
+                                color = colorEstado,
                                 fontSize = 10.sp,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
                     }
                     Text(
-                        text = "${trabajador.puesto} • ${stringResource(R.string.salary)}: ${trabajador.salario}",
+                        text = "${empleado.puesto} • ${stringResource(R.string.salary)}: ${empleado.salario}",
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
                 }
+                // Botón para llamar directamente por teléfono
                 IconButton(onClick = {
-                    val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = Uri.parse("tel:${trabajador.telefono}")
+                    val intencion = Intent(Intent.ACTION_DIAL).apply {
+                        data = Uri.parse("tel:${empleado.telefono}")
                     }
-                    context.startActivity(intent)
+                    contexto.startActivity(intencion)
                 }) {
                     Icon(Icons.Default.Phone, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
                 }
+                // Botón para mandar un email
                 IconButton(onClick = {
-                    val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = Uri.parse("mailto:${trabajador.email}")
+                    val intencion = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:${empleado.email}")
                     }
-                    context.startActivity(intent)
+                    contexto.startActivity(intencion)
                 }) {
                     Icon(Icons.Default.Email, contentDescription = stringResource(R.string.send_email), tint = MaterialTheme.colorScheme.secondary)
                 }
-                IconButton(onClick = onDelete) {
+                // Botón para quitar al empleado de la lista
+                IconButton(onClick = alBorrar) {
                     Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Gray)
                 }
             }
@@ -223,49 +240,51 @@ fun TrabajadorCard(trabajador: Trabajador, onToggleActivo: () -> Unit, onDelete:
     }
 }
 
+// El cuadro que se abre para rellenar los datos del nuevo fichaje
 @Composable
-fun AgregarTrabajadorDialog(onDismiss: () -> Unit, onConfirm: (String, String, String, String, Double, Boolean) -> Unit) {
-    var nombre by remember { mutableStateOf("") }
-    var puesto by remember { mutableStateOf("") }
-    var telefono by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var salario by remember { mutableStateOf("") }
-    var activo by remember { mutableStateOf(true) }
-    val context = LocalContext.current
+fun DialogoParaContratar(alCerrar: () -> Unit, alGuardar: (String, String, String, String, Double, Boolean) -> Unit) {
+    var queNombre by remember { mutableStateOf("") }
+    var quePuesto by remember { mutableStateOf("") }
+    var queTelefono by remember { mutableStateOf("") }
+    var queEmail by remember { mutableStateOf("") }
+    var queSalario by remember { mutableStateOf("") }
+    var estaTrabajandoYa by remember { mutableStateOf(true) }
+    val aviso = LocalContext.current
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = alCerrar,
         title = { Text(stringResource(R.string.new_employee)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text(stringResource(R.string.name)) }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = puesto, onValueChange = { puesto = it }, label = { Text(stringResource(R.string.position)) }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = telefono, onValueChange = { telefono = it }, label = { Text(stringResource(R.string.phone)) }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text(stringResource(R.string.email)) }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = salario, onValueChange = { salario = it }, label = { Text(stringResource(R.string.salario)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = queNombre, onValueChange = { queNombre = it }, label = { Text(stringResource(R.string.name)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = quePuesto, onValueChange = { quePuesto = it }, label = { Text(stringResource(R.string.position)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = queTelefono, onValueChange = { queTelefono = it }, label = { Text(stringResource(R.string.phone)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = queEmail, onValueChange = { queEmail = it }, label = { Text(stringResource(R.string.email)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = queSalario, onValueChange = { queSalario = it }, label = { Text(stringResource(R.string.salario)) }, modifier = Modifier.fillMaxWidth())
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = activo, onCheckedChange = { activo = it })
+                    Checkbox(checked = estaTrabajandoYa, onCheckedChange = { estaTrabajandoYa = it })
                     Text(stringResource(R.string.active_worker))
                 }
             }
         },
         confirmButton = {
             Button(onClick = {
-                val salarioDouble = salario.toDoubleOrNull()
-                if (nombre.isBlank() || puesto.isBlank() || telefono.isBlank() || email.isBlank() || salarioDouble == null) {
-                    Toast.makeText(context, context.getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show()
+                val sueldoNumero = queSalario.toDoubleOrNull()
+                // Comprobamos que no falte nada importante
+                if (queNombre.isBlank() || quePuesto.isBlank() || queTelefono.isBlank() || queEmail.isBlank() || sueldoNumero == null) {
+                    Toast.makeText(aviso, aviso.getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show()
                 } else {
-                    onConfirm(nombre, puesto, telefono, email, salarioDouble, activo)
+                    alGuardar(queNombre, quePuesto, queTelefono, queEmail, sueldoNumero, estaTrabajandoYa)
                 }
             }) {
                 Text(stringResource(R.string.add))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = alCerrar) {
                 Text(stringResource(R.string.cancel))
             }
         }

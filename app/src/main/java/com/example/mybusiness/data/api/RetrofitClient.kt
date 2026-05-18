@@ -12,40 +12,46 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
+// Este objeto es como el "cartero" que se encarga de enviar y recibir cosas de internet
 object RetrofitClient {
-    // URL Base terminada en /
-    private const val BASE_URL = "https://openrouter.ai/api/v1/"
+    // La dirección de la página web a la que vamos a llamar
+    private const val DIRECCION_BASE = "https://openrouter.ai/api/v1/"
 
-    private fun getUnsafeOkHttpClient(): OkHttpClient {
-        val logging = HttpLoggingInterceptor().apply {
+    // Esta función es un poco especial: sirve para que el móvil confíe en la conexión
+    // aunque sea un poco "insegura" (se usa mucho cuando estamos probando cosas)
+    private fun configurarClienteSeguro(): OkHttpClient {
+        val interceptorLog = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
         
-        val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+        val gestorConfianza = arrayOf<TrustManager>(object : X509TrustManager {
             override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
             override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
             override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
         })
 
-        val sslContext = SSLContext.getInstance("SSL")
-        sslContext.init(null, trustAllCerts, SecureRandom())
+        val contextoSSL = SSLContext.getInstance("SSL")
+        contextoSSL.init(null, gestorConfianza, SecureRandom())
         
         return OkHttpClient.Builder()
-            .sslSocketFactory(sslContext.socketFactory, trustAllCerts[0] as X509TrustManager)
+            .sslSocketFactory(contextoSSL.socketFactory, gestorConfianza[0] as X509TrustManager)
             .hostnameVerifier { _, _ -> true }
-            .addInterceptor(logging)
+            .addInterceptor(interceptorLog)
             .build()
     }
 
-    private val moshi = Moshi.Builder()
+    // Moshi es una herramienta que traduce el texto raro que manda la web (JSON) a cosas que entiende Kotlin
+    private val traductorMoshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
 
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .client(getUnsafeOkHttpClient())
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
+    // Configuramos Retrofit, que es el motor principal para las llamadas a internet
+    private val motorRetrofit = Retrofit.Builder()
+        .baseUrl(DIRECCION_BASE)
+        .client(configurarClienteSeguro())
+        .addConverterFactory(MoshiConverterFactory.create(traductorMoshi))
         .build()
 
-    val openRouterApi: OpenRouterApi = retrofit.create(OpenRouterApi::class.java)
+    // Aquí creamos la conexión final con la API de OpenRouter
+    val conexionApiChat: OpenRouterApi = motorRetrofit.create(OpenRouterApi::class.java)
 }

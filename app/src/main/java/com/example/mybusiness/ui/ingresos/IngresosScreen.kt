@@ -35,18 +35,24 @@ import com.example.mybusiness.data.Categoria
 import com.example.mybusiness.ui.IconosCategoria
 import com.example.mybusiness.ui.PreferenciasViewModel
 
+// Esta pantalla sirve para ver y anotar el dinero que va entrando al negocio
 @Composable
-fun IngresosScreen(viewModel: IngresosViewModel, prefViewModel: PreferenciasViewModel = viewModel()) {
-    val ingresos by viewModel.ingresos.collectAsState()
-    val catViewModel: CategoriasViewModel = viewModel()
-    val categorias by catViewModel.categorias.collectAsState()
+fun IngresosScreen(controladorIngresos: IngresosViewModel, controladorPreferencias: PreferenciasViewModel = viewModel()) {
+    // Escuchamos la lista de ingresos que nos da el controlador
+    val listaActualIngresos by controladorIngresos.listaDeIngresos.collectAsState()
     
-    var mostrarDialogo by remember { mutableStateOf(false) }
+    // Necesitamos las categorías para poder clasificar los ingresos
+    val catViewModel: CategoriasViewModel = viewModel()
+    val listaCategorias by catViewModel.categorias.collectAsState()
+    
+    // Para saber si tenemos que enseñar el cuadro de "Añadir nuevo"
+    var mostrarCuadroNuevo by remember { mutableStateOf(false) }
 
     Scaffold(
         floatingActionButton = {
+            // Botón redondo con un "+" para añadir ingresos
             FloatingActionButton(
-                onClick = { mostrarDialogo = true },
+                onClick = { mostrarCuadroNuevo = true },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -69,21 +75,24 @@ fun IngresosScreen(viewModel: IngresosViewModel, prefViewModel: PreferenciasView
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            if (ingresos.isEmpty()) {
+            // Si no hay ingresos, enseñamos un dibujo y un texto de "Está vacío"
+            if (listaActualIngresos.isEmpty()) {
                 EstadoVacio(
                     mensaje = stringResource(R.string.no_income),
                     subMensaje = stringResource(R.string.register_first_income),
                     icono = Icons.AutoMirrored.Filled.TrendingUp
                 )
             } else {
+                // Si hay ingresos, los ponemos uno debajo de otro en una lista
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    itemsIndexed(ingresos) { index, ingreso ->
-                        AnimacionEntradaLista(indice = index) {
-                            IngresoCard(
-                                ingreso = ingreso,
-                                onDelete = { viewModel.eliminarIngreso(ingreso) }
+                    itemsIndexed(listaActualIngresos) { indice, unIngreso ->
+                        AnimacionEntradaLista(indice = indice) {
+                            TarjetaDeIngreso(
+                                elIngreso = unIngreso as Ingreso,
+                                alBorrar = { controladorIngresos.borrarIngreso(unIngreso as Ingreso) },
+                                pref = controladorPreferencias
                             )
                         }
                     }
@@ -91,25 +100,33 @@ fun IngresosScreen(viewModel: IngresosViewModel, prefViewModel: PreferenciasView
             }
         }
 
-        if (mostrarDialogo) {
-            val ingresosCategorias = categorias.filter { it.esIngreso }
-            AgregarIngresoDialog(
-                categoriasData = if (ingresosCategorias.isEmpty()) listOf(Categoria(nombre = "Venta", esIngreso = true, iconoNombre = "Sell")) else ingresosCategorias,
-                onDismiss = { mostrarDialogo = false },
-                onConfirm = { concepto, cantidad, categoria, esFijo ->
-                    viewModel.agregarIngreso(concepto, cantidad, System.currentTimeMillis(), categoria, esFijo)
-                    mostrarDialogo = false
+        // Si hemos pulsado el botón "+", enseñamos este diálogo
+        if (mostrarCuadroNuevo) {
+            // Solo queremos las categorías que son para ingresos (no las de gastos)
+            val categoriasParaIngresos = listaCategorias.filter { it.esIngreso }
+            DialogoParaAñadirIngreso(
+                listaDeCategorias = if (categoriasParaIngresos.isEmpty()) listOf(Categoria(nombre = "Venta", esIngreso = true, iconoNombre = "Sell")) else categoriasParaIngresos,
+                alCerrar = { mostrarCuadroNuevo = false },
+                alGuardar = { concepto, dinero, categoria, esFijo ->
+                    controladorIngresos.apuntarNuevoIngreso(concepto, dinero, System.currentTimeMillis(), categoria, esFijo)
+                    mostrarCuadroNuevo = false
                 }
             )
         }
     }
 }
 
+// Así es como se ve la tarjeta de cada ingreso suelto
 @Composable
-fun IngresoCard(ingreso: Ingreso, onDelete: () -> Unit, prefViewModel: PreferenciasViewModel = viewModel(), catViewModel: CategoriasViewModel = viewModel()) {
+fun TarjetaDeIngreso(
+    elIngreso: Ingreso, 
+    alBorrar: () -> Unit, 
+    pref: PreferenciasViewModel, 
+    catViewModel: CategoriasViewModel = viewModel()
+) {
     val categorias by catViewModel.categorias.collectAsState()
-    val categoriaData = categorias.find { it.nombre == ingreso.categoria }
-    val icono = IconosCategoria.obtenerIcono(categoriaData?.iconoNombre)
+    val datosCategoria = categorias.find { it.nombre == elIngreso.categoria }
+    val dibujoIcono = IconosCategoria.obtenerIcono(datosCategoria?.iconoNombre)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -120,6 +137,7 @@ fun IngresoCard(ingreso: Ingreso, onDelete: () -> Unit, prefViewModel: Preferenc
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Un cuadradito de color con el icono de la categoría
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -127,18 +145,19 @@ fun IngresoCard(ingreso: Ingreso, onDelete: () -> Unit, prefViewModel: Preferenc
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(imageVector = icono, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(imageVector = dibujoIcono, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = ingreso.concepto,
+                        text = elIngreso.concepto,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    if (ingreso.esFijo) {
+                    // Si el ingreso es fijo (como un sueldo recurrente), ponemos una chincheta
+                    if (elIngreso.esFijo) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             Icons.Default.PushPin,
@@ -148,61 +167,68 @@ fun IngresoCard(ingreso: Ingreso, onDelete: () -> Unit, prefViewModel: Preferenc
                         )
                     }
                 }
+                // Ponemos el día y la hora en que se anotó
                 Text(
-                    text = SimpleDateFormat("dd MMM, h:mm a", Locale.getDefault()).format(Date(ingreso.fecha)),
+                    text = SimpleDateFormat("dd MMM, h:mm a", Locale.getDefault()).format(Date(elIngreso.fecha)),
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
+                // El dinero que ha entrado en verde
                 Text(
-                    text = "+${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", ingreso.cantidad)}",
+                    text = "+${pref.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", elIngreso.cantidad)}",
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
                 Text(
-                    text = ingreso.categoria,
+                    text = elIngreso.categoria,
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
             }
-            IconButton(onClick = onDelete) {
+            // Botón de la papelera para borrar
+            IconButton(onClick = alBorrar) {
                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Gray)
             }
         }
     }
 }
 
+// Este es el formulario que aparece para escribir un nuevo ingreso
 @Composable
-fun AgregarIngresoDialog(
-    categoriasData: List<Categoria>,
-    onDismiss: () -> Unit,
-    onConfirm: (String, Double, String, Boolean) -> Unit
+fun DialogoParaAñadirIngreso(
+    listaDeCategorias: List<Categoria>,
+    alCerrar: () -> Unit,
+    alGuardar: (String, Double, String, Boolean) -> Unit
 ) {
-    var concepto by remember { mutableStateOf("") }
-    var cantidadStr by remember { mutableStateOf("") }
-    var categoriaSeleccionada by remember { mutableStateOf(categoriasData.first().nombre) }
-    var esFijo by remember { mutableStateOf(false) }
-    val contexto = LocalContext.current
+    var queEs by remember { mutableStateOf("") }
+    var cuantoDinero by remember { mutableStateOf("") }
+    var queCategoria by remember { mutableStateOf(listaDeCategorias.first().nombre) }
+    var seRepiteSiempre by remember { mutableStateOf(false) }
+    val aviso = LocalContext.current
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = alCerrar,
         title = { Text(stringResource(R.string.new_income_entry)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedTextField(value = concepto, onValueChange = { concepto = it }, label = { Text(stringResource(R.string.concept)) }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = cantidadStr, onValueChange = { cantidadStr = it }, label = { Text(stringResource(R.string.salary)) }, modifier = Modifier.fillMaxWidth())
+                // Hueco para escribir el nombre (ej. "Venta de pan")
+                OutlinedTextField(value = queEs, onValueChange = { queEs = it }, label = { Text(stringResource(R.string.concept)) }, modifier = Modifier.fillMaxWidth())
+                // Hueco para escribir el dinero
+                OutlinedTextField(value = cuantoDinero, onValueChange = { cuantoDinero = it }, label = { Text(stringResource(R.string.salary)) }, modifier = Modifier.fillMaxWidth())
 
                 Text(stringResource(R.string.select_category), fontWeight = FontWeight.Bold)
+                // Lista de burbujas para elegir la categoría
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(categoriasData) { cat ->
+                    items(listaDeCategorias) { cat ->
                         FilterChip(
-                            selected = categoriaSeleccionada == cat.nombre,
-                            onClick = { categoriaSeleccionada = cat.nombre },
+                            selected = queCategoria == cat.nombre,
+                            onClick = { queCategoria = cat.nombre },
                             label = { 
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
@@ -217,28 +243,30 @@ fun AgregarIngresoDialog(
                         )
                     }
                 }
+                // Casilla para marcar si el dinero entra todos los meses
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = esFijo, onCheckedChange = { esFijo = it })
+                    Checkbox(checked = seRepiteSiempre, onCheckedChange = { seRepiteSiempre = it })
                     Text(stringResource(R.string.fixed_income))
                 }
             }
         },
         confirmButton = {
             Button(onClick = {
-                val cantidad = cantidadStr.toDoubleOrNull()
-                if (concepto.isBlank() || cantidadStr.isBlank()) {
-                    Toast.makeText(contexto, contexto.getString(R.string.all_fields_required), Toast.LENGTH_SHORT).show()
-                } else if (cantidad == null) {
-                    Toast.makeText(contexto, contexto.getString(R.string.invalid_amount), Toast.LENGTH_SHORT).show()
+                val numeroDinero = cuantoDinero.toDoubleOrNull()
+                // Comprobamos que hayan escrito todo bien antes de guardar
+                if (queEs.isBlank() || cuantoDinero.isBlank()) {
+                    Toast.makeText(aviso, aviso.getString(R.string.all_fields_required), Toast.LENGTH_SHORT).show()
+                } else if (numeroDinero == null) {
+                    Toast.makeText(aviso, aviso.getString(R.string.invalid_amount), Toast.LENGTH_SHORT).show()
                 } else {
-                    onConfirm(concepto, cantidad, categoriaSeleccionada, esFijo)
+                    alGuardar(queEs, numeroDinero, queCategoria, seRepiteSiempre)
                 }
             }) {
                 Text(stringResource(R.string.add))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = alCerrar) {
                 Text(stringResource(R.string.cancel))
             }
         }

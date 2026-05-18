@@ -10,16 +10,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class TrabajadoresViewModel(application: Application) : AndroidViewModel(application) {
+// Este componente sirve para gestionar a las personas que trabajan en la empresa
+class TrabajadoresViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) {
 
-    private val repository = BusinessRepository.getInstance(application)
+    // El repositorio es como el archivo donde guardamos los contratos y datos de los empleados
+    private val repositorio = BusinessRepository.getInstance(aplicacion)
 
-    val trabajadores: StateFlow<List<Trabajador>> = repository.todosLosTrabajadores
+    // Esta es la lista de todos los trabajadores que tenemos apuntados
+    val listaDeTrabajadores: StateFlow<List<Trabajador>> = repositorio.todosLosTrabajadores
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun agregarTrabajador(nombre: String, puesto: String, telefono: String, email: String, salario: Double, activo: Boolean) {
+    // Función para contratar (añadir) a un nuevo trabajador
+    fun contratarTrabajador(nombre: String, puesto: String, telefono: String, email: String, salario: Double, activo: Boolean) {
         viewModelScope.launch {
-            repository.insertarTrabajador(
+            repositorio.insertarTrabajador(
                 Trabajador(
                     nombre = nombre,
                     puesto = puesto,
@@ -32,15 +36,17 @@ class TrabajadoresViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun actualizarTrabajador(trabajador: Trabajador) {
+    // Función para cambiar los datos de un trabajador (ej. subirle el sueldo o cambiar su puesto)
+    fun actualizarDatosTrabajador(trabajador: Trabajador) {
         viewModelScope.launch {
-            repository.insertarTrabajador(trabajador)
+            repositorio.insertarTrabajador(trabajador)
         }
     }
 
-    fun eliminarTrabajador(trabajador: Trabajador) {
+    // Función para despedir o borrar a un trabajador de la lista
+    fun borrarTrabajador(trabajador: Trabajador) {
         viewModelScope.launch {
-            repository.eliminarTrabajador(trabajador)
+            repositorio.eliminarTrabajador(trabajador)
         }
     }
 }

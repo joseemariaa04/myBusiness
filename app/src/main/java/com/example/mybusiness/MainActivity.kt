@@ -153,15 +153,15 @@ fun MainApp(prefViewModel: PreferenciasViewModel) {
                     }
                 )
             }
-            composable(Screen.Gastos.route) { GastosScreen(viewModel = gastosViewModel) }
-            composable(Screen.Ingresos.route) { IngresosScreen(viewModel = ingresosViewModel) }
-            composable(Screen.Trabajadores.route) { TrabajadoresScreen(viewModel = trabajadoresViewModel) }
-            composable(Screen.Clientes.route) { ClientesScreen(viewModel = clientesViewModel) }
+            composable(Screen.Gastos.route) { GastosScreen(controladorGastos = gastosViewModel, controladorPreferencias = prefViewModel) }
+            composable(Screen.Ingresos.route) { IngresosScreen(controladorIngresos = ingresosViewModel, controladorPreferencias = prefViewModel) }
+            composable(Screen.Trabajadores.route) { TrabajadoresScreen(controladorTrabajadores = trabajadoresViewModel) }
+            composable(Screen.Clientes.route) { ClientesScreen(controladorClientes = clientesViewModel) }
             composable(Screen.Chat.route) { 
                 ChatScreen(
-                    viewModel = chatViewModel,
-                    inicioViewModel = inicioViewModel,
-                    prefViewModel = prefViewModel
+                    controladorDelChat = chatViewModel,
+                    controladorDeInicio = inicioViewModel,
+                    controladorDePreferencias = prefViewModel
                 ) 
             }
             composable(
@@ -177,8 +177,9 @@ fun MainApp(prefViewModel: PreferenciasViewModel) {
                 DetalleMesScreen(
                     mesId = mesId,
                     nombreMes = nombreMes,
-                    viewModel = detalleViewModel,
-                    onVolver = { navController.popBackStack() }
+                    controladorDetalle = detalleViewModel,
+                    onVolver = { navController.popBackStack() },
+                    controladorDePreferencias = prefViewModel
                 )
             }
         }

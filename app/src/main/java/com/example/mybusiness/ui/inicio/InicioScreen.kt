@@ -66,7 +66,7 @@ fun InicioScreen(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.comprobarCierreMesAutomatico()
+                viewModel.comprobarSiTocaCerrarElMes()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -76,7 +76,7 @@ fun InicioScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.eventos.collect { mensaje ->
+        viewModel.eventosDeAviso.collect { mensaje ->
             Toast.makeText(contexto, mensaje, Toast.LENGTH_LONG).show()
         }
     }
@@ -92,9 +92,9 @@ fun InicioScreen(
     val ingresosTotales = estado.ingresosTotales
     val gastosTotales = estado.gastosTotales
     val historial = estado.historial
-    val varBeneficio = estado.varBeneficio
-    val varIngresos = estado.varIngresos
-    val varGastos = estado.varGastos
+    val varBeneficio = estado.variacionBeneficio
+    val varIngresos = estado.variacionIngresos
+    val varGastos = estado.variacionGastos
 
     LazyColumn(
         modifier = Modifier
@@ -192,7 +192,7 @@ fun InicioScreen(
                     variacion = varIngresos,
                     modifier = Modifier.weight(1.0f),
                     onClick = { 
-                        desgloseATostrar = tituloIngresos to estado.desgloseIngresos 
+                        desgloseATostrar = tituloIngresos to estado.desglosePorCategoriasIngresos 
                     }
                 )
                 ResumenCard(
@@ -204,7 +204,7 @@ fun InicioScreen(
                     inverso = true,
                     modifier = Modifier.weight(1.0f),
                     onClick = { 
-                        desgloseATostrar = tituloGastos to estado.desgloseGastos
+                        desgloseATostrar = tituloGastos to estado.desglosePorCategoriasGastos
                     }
                 )
             }

@@ -10,19 +10,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class IngresosViewModel(application: Application) : AndroidViewModel(application) {
+// Este componente maneja todo el dinero que entra en el negocio
+class IngresosViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) {
 
-    private val repository = BusinessRepository.getInstance(application)
+    // El repositorio nos ayuda a guardar y leer los ingresos en la base de datos
+    private val repositorio = BusinessRepository.getInstance(aplicacion)
 
-    val ingresos: StateFlow<List<Ingreso>> = repository.todosLosIngresos
+    // Esta es la lista de todos los ingresos que hay ahora mismo
+    val listaDeIngresos: StateFlow<List<Ingreso>> = repositorio.todosLosIngresos
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun agregarIngreso(concepto: String, monto: Double, fecha: Long, categoria: String, esFijo: Boolean = false) {
+    // Función para apuntar un nuevo dinero que ha entrado
+    fun apuntarNuevoIngreso(concepto: String, cantidad: Double, fecha: Long, categoria: String, esFijo: Boolean = false) {
         viewModelScope.launch {
-            repository.insertarIngreso(
+            repositorio.insertarIngreso(
                 Ingreso(
                     concepto = concepto,
-                    cantidad = monto,
+                    cantidad = cantidad,
                     fecha = fecha,
                     categoria = categoria,
                     esFijo = esFijo
@@ -31,9 +35,10 @@ class IngresosViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun eliminarIngreso(ingreso: Ingreso) {
+    // Función para borrar un ingreso si nos hemos equivocado
+    fun borrarIngreso(ingreso: Ingreso) {
         viewModelScope.launch {
-            repository.eliminarIngreso(ingreso)
+            repositorio.eliminarIngreso(ingreso)
         }
     }
 }

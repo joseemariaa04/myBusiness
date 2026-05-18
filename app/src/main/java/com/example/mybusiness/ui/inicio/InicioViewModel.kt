@@ -20,126 +20,136 @@ import java.util.Calendar
 
 import com.example.mybusiness.data.HistorialMes
 
+// Esta clase guarda toda la información que se muestra en la pantalla principal
 data class EstadoInicio(
     val beneficioMensual: Double = 0.0,
     val ingresosTotales: Double = 0.0,
     val gastosTotales: Double = 0.0,
     val historial: List<HistorialMes> = emptyList(),
-    val varBeneficio: Double? = null,
-    val varIngresos: Double? = null,
-    val varGastos: Double? = null,
-    val desgloseIngresos: Map<String, Double> = emptyMap(),
-    val desgloseGastos: Map<String, Double> = emptyMap()
+    val variacionBeneficio: Double? = null,
+    val variacionIngresos: Double? = null,
+    val variacionGastos: Double? = null,
+    val desglosePorCategoriasIngresos: Map<String, Double> = emptyMap(),
+    val desglosePorCategoriasGastos: Map<String, Double> = emptyMap()
 )
 
-class InicioViewModel(application: Application) : AndroidViewModel(application) {
+class InicioViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) {
 
-    private val repository = BusinessRepository.getInstance(application)
-    private val prefs = application.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    // El repositorio es como el bibliotecario que sabe dónde están guardados los datos en la base de datos
+    private val repositorio = BusinessRepository.getInstance(aplicacion)
+    // La cajita de preferencias para guardar cosas pequeñas como fechas
+    private val cajitaDePreferencias = aplicacion.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
-    private val _eventos = MutableSharedFlow<String>()
-    val eventos = _eventos.asSharedFlow()
+    // Esto sirve para mandar avisos a la pantalla (como "Mes cerrado con éxito")
+    private val _eventosDeAviso = MutableSharedFlow<String>()
+    val eventosDeAviso = _eventosDeAviso.asSharedFlow()
 
     init {
-        comprobarCierreMesAutomatico()
+        // Nada más empezar, miramos si toca cerrar el mes porque ha pasado el tiempo
+        comprobarSiTocaCerrarElMes()
     }
 
-    private var procesandoCierre = false
+    private var estaCerrandoElMesActualmente = false
 
-    fun comprobarCierreMesAutomatico() {
-        if (procesandoCierre) return
-        procesandoCierre = true
+    fun comprobarSiTocaCerrarElMes() {
+        if (estaCerrandoElMesActualmente) return
+        estaCerrandoElMesActualmente = true
         
         viewModelScope.launch {
             try {
-                val sdfStorage = SimpleDateFormat("yyyy-MM", Locale.US)
-                val sdfDisplay = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+                // Formatos para entender las fechas
+                val formatoFechaGuardada = SimpleDateFormat("yyyy-MM", Locale.US)
+                val formatoParaMostrarUsuario = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
                 
                 val hoy = Calendar.getInstance()
-                val mesActualStorage = sdfStorage.format(hoy.time)
+                val mesActualTexto = formatoFechaGuardada.format(hoy.time)
                 
-                val ultimoMesCerradoStorage = prefs.getString("ultimo_mes_cerrado", "") ?: ""
+                val ultimoMesQueCerramos = cajitaDePreferencias.getString("ultimo_mes_cerrado", "") ?: ""
 
-                // Si es la primera vez que se usa la app, marcamos el mes actual como "visto"
-                if (ultimoMesCerradoStorage.isEmpty()) {
-                    prefs.edit().putString("ultimo_mes_cerrado", mesActualStorage).apply()
+                // Si es la primera vez que abres la app, simplemente anotamos que este es el mes actual
+                if (ultimoMesQueCerramos.isEmpty()) {
+                    cajitaDePreferencias.edit().putString("ultimo_mes_cerrado", mesActualTexto).apply()
                     return@launch
                 }
 
-                // Si el mes guardado es distinto al actual (incluye cambio de año), cerramos el periodo anterior
-                if (ultimoMesCerradoStorage != mesActualStorage) {
-                    val nombreMesACerrar = try {
-                        val fechaGuardada = sdfStorage.parse(ultimoMesCerradoStorage)
-                        fechaGuardada?.let { 
-                            sdfDisplay.format(it).replaceFirstChar { c -> c.uppercase() } 
-                        } ?: ultimoMesCerradoStorage
+                // Si el mes que tenemos guardado no es el mismo que el de hoy, es que hemos cambiado de mes
+                if (ultimoMesQueCerramos != mesActualTexto) {
+                    val nombreDelMesViejo = try {
+                        val fechaLeida = formatoFechaGuardada.parse(ultimoMesQueCerramos)
+                        fechaLeida?.let { 
+                            formatoParaMostrarUsuario.format(it).replaceFirstChar { letra -> letra.uppercase() } 
+                        } ?: ultimoMesQueCerramos
                     } catch (e: Exception) {
-                        ultimoMesCerradoStorage
+                        ultimoMesQueCerramos
                     }
 
-                    // Ejecutamos el cierre con los datos acumulados hasta el momento
-                    repository.cerrarMesAutomaticamente(nombreMesACerrar)
+                    // Le decimos al repositorio que guarde los datos del mes que acaba de terminar
+                    repositorio.cerrarMesAutomaticamente(nombreDelMesViejo)
                     
-                    // Actualizamos a la marca del mes actual para que no vuelva a saltar hasta el próximo mes
-                    prefs.edit().putString("ultimo_mes_cerrado", mesActualStorage).apply()
-                    _eventos.emit(getApplication<Application>().getString(R.string.month_closed_success, nombreMesACerrar))
+                    // Apuntamos que ya hemos cerrado este mes para no volver a hacerlo hasta el que viene
+                    cajitaDePreferencias.edit().putString("ultimo_mes_cerrado", mesActualTexto).apply()
+                    // Avisamos al usuario con un mensajito
+                    _eventosDeAviso.emit(getApplication<Application>().getString(R.string.month_closed_success, nombreDelMesViejo))
                 }
             } finally {
-                procesandoCierre = false
+                estaCerrandoElMesActualmente = false
             }
         }
     }
 
+    // Esta es la parte más lista: junta todos los datos (ingresos, gastos, historial) y calcula los totales
     val estado: StateFlow<EstadoInicio> = combine(
-        repository.todosLosIngresos,
-        repository.todosLosGastos,
-        repository.todoElHistorial,
-        repository.todosLosTrabajadores
-    ) { ingresos, gastos, historial, trabajadores ->
-        val salarioActivos = trabajadores.filter { it.activo }.sumOf { it.salario }
-        val totalIngresos = ingresos.sumOf { it.cantidad }
-        val totalGastos = gastos.sumOf { it.cantidad } + salarioActivos
-        val beneficioActual = totalIngresos - totalGastos
+        repositorio.todosLosIngresos,
+        repositorio.todosLosGastos,
+        repositorio.todoElHistorial,
+        repositorio.todosLosTrabajadores
+    ) { listaIngresos, listaGastos, listaHistorial, listaTrabajadores ->
+        // Calculamos cuánto pagamos en sueldos sumando lo de los trabajadores activos
+        val totalSueldosActivos = listaTrabajadores.filter { it.activo }.sumOf { it.salario }
+        // Sumamos todos los ingresos del mes
+        val sumaIngresos = listaIngresos.sumOf { it.cantidad }
+        // Sumamos todos los gastos y le añadimos los sueldos
+        val sumaGastos = listaGastos.sumOf { it.cantidad } + totalSueldosActivos
+        // El beneficio es lo que queda después de pagar todo
+        val beneficioNeto = sumaIngresos - sumaGastos
 
-        // Tomamos el mes anterior (el último cerrado) para comparar
-        // El historial suele venir ordenado por fecha desc o asc, supongamos desc o que el primero es el más reciente
-        // Según el código previo en InicioScreen: historial.reversed() se usa para la gráfica (orden cronológico)
-        // Entonces historial.firstOrNull() debería ser el mes más reciente cerrado.
-        val ultimoMes = historial.firstOrNull()
+        // Buscamos el último mes cerrado para ver si hemos mejorado o empeorado
+        val datosMesAnterior = listaHistorial.firstOrNull()
         
-        fun calcularVariacion(actual: Double, anterior: Double?): Double? {
-            if (anterior == null || anterior == 0.0) return null
-            // Variación porcentual: ((actual - anterior) / anterior) * 100
-            // Si el actual es 0 y el anterior es 100, la variación es -100%
-            // Si el actual es 500 y el anterior es 100, la variación es +400%
-            // Si el actual es 20 y el anterior es 100, la variación es -80%
-            return ((actual - anterior) / Math.abs(anterior)) * 100
+        // Esta función calcula el porcentaje de cambio entre este mes y el anterior
+        fun calcularPorcentajeDeCambio(valorHoy: Double, valorAyer: Double?): Double? {
+            if (valorAyer == null || valorAyer == 0.0) return null
+            return ((valorHoy - valorAyer) / Math.abs(valorAyer)) * 100
         }
 
-        val desgloseIngresos: Map<String, Double> = ingresos.groupBy { it.categoria }
-            .mapValues { entry -> entry.value.sumOf { it.cantidad } }
+        // Agrupamos los ingresos por su categoría para saber de dónde viene el dinero
+        val mapaIngresosCategorias: Map<String, Double> = listaIngresos.groupBy { it.categoria }
+            .mapValues { grupo -> grupo.value.sumOf { it.cantidad } }
             .filter { it.value > 0.0 }
 
-        val desgloseGastosBase: MutableMap<String, Double> = gastos.groupBy { it.categoria }
-            .mapValues { entry -> entry.value.sumOf { it.cantidad } }
+        // Hacemos lo mismo con los gastos
+        val mapaGastosCategoriasTemporal: MutableMap<String, Double> = listaGastos.groupBy { it.categoria }
+            .mapValues { grupo -> grupo.value.sumOf { it.cantidad } }
             .toMutableMap()
         
-        if (salarioActivos > 0.0) {
-            val etiquetaSueldos = getApplication<Application>().getString(R.string.salario)
-            desgloseGastosBase[etiquetaSueldos] = (desgloseGastosBase[etiquetaSueldos] ?: 0.0) + salarioActivos
+        // No nos olvidamos de meter los sueldos en el desglose de gastos
+        if (totalSueldosActivos > 0.0) {
+            val palabraSueldos = getApplication<Application>().getString(R.string.salario)
+            mapaGastosCategoriasTemporal[palabraSueldos] = (mapaGastosCategoriasTemporal[palabraSueldos] ?: 0.0) + totalSueldosActivos
         }
-        val desgloseGastos: Map<String, Double> = desgloseGastosBase.filter { it.value > 0.0 }
+        val mapaGastosFinal = mapaGastosCategoriasTemporal.filter { it.value > 0.0 }
 
+        // Metemos todos los cálculos en el "paquete" de EstadoInicio para enviarlo a la pantalla
         EstadoInicio(
-            beneficioMensual = beneficioActual,
-            ingresosTotales = totalIngresos,
-            gastosTotales = totalGastos,
-            historial = historial,
-            varBeneficio = calcularVariacion(beneficioActual, ultimoMes?.beneficio),
-            varIngresos = calcularVariacion(totalIngresos, ultimoMes?.ingresosTotales),
-            varGastos = calcularVariacion(totalGastos, ultimoMes?.gastosTotales),
-            desgloseIngresos = desgloseIngresos,
-            desgloseGastos = desgloseGastos
+            beneficioMensual = beneficioNeto,
+            ingresosTotales = sumaIngresos,
+            gastosTotales = sumaGastos,
+            historial = listaHistorial,
+            variacionBeneficio = calcularPorcentajeDeCambio(beneficioNeto, datosMesAnterior?.beneficio),
+            variacionIngresos = calcularPorcentajeDeCambio(sumaIngresos, datosMesAnterior?.ingresosTotales),
+            variacionGastos = calcularPorcentajeDeCambio(sumaGastos, datosMesAnterior?.gastosTotales),
+            desglosePorCategoriasIngresos = mapaIngresosCategorias,
+            desglosePorCategoriasGastos = mapaGastosFinal
         )
     }.stateIn(
         scope = viewModelScope,

@@ -23,33 +23,41 @@ import com.example.mybusiness.R
 import com.example.mybusiness.ui.PreferenciasViewModel
 import com.example.mybusiness.ui.inicio.InicioViewModel
 
+// Esta es la pantalla del chat donde podemos hablar con el asistente inteligente
 @Composable
 fun ChatScreen(
-    viewModel: ChatViewModel = viewModel(),
-    inicioViewModel: InicioViewModel,
-    prefViewModel: PreferenciasViewModel
+    controladorDelChat: ChatViewModel = viewModel(),
+    controladorDeInicio: InicioViewModel,
+    controladorDePreferencias: PreferenciasViewModel
 ) {
-    val messages by viewModel.uiState.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val estadoInicio by inicioViewModel.estado.collectAsState()
-    var inputText by remember { mutableStateOf("") }
-    val scrollState = rememberLazyListState()
+    // Aquí sacamos la lista de mensajes que se han ido enviando
+    val listaDeMensajes by controladorDelChat.estadoMensajes.collectAsState()
+    // Esto nos sirve para saber si la IA está escribiendo algo ahora mismo
+    val estaCargandoLaIA by controladorDelChat.estaCargando.collectAsState()
+    // Cogemos los datos del negocio para que la IA sepa qué recomendarnos
+    val estadoDelNegocio by controladorDeInicio.estado.collectAsState()
+    
+    // Lo que estamos escribiendo en el hueco del teclado
+    var textoEscritoPorElUsuario by remember { mutableStateOf("") }
+    // Este estado sirve para que la lista de mensajes se mueva sola al final
+    val estadoDeLaLista = rememberLazyListState()
 
-    val contextText = remember(estadoInicio, prefViewModel.descripcionEmpresa) {
+    // Preparamos el "chuletero" para la IA con los datos de nuestra empresa
+    val informacionDeLaEmpresa = remember(estadoDelNegocio, controladorDePreferencias.descripcionEmpresa) {
         """
-            Empresa: ${prefViewModel.nombreEmpresa}
-            Descripción: ${prefViewModel.descripcionEmpresa}
+            Empresa: ${controladorDePreferencias.nombreEmpresa}
+            Descripción: ${controladorDePreferencias.descripcionEmpresa}
             Datos mes actual:
-            - Ingresos: ${estadoInicio.ingresosTotales} ${prefViewModel.simboloMoneda}
-            - Gastos: ${estadoInicio.gastosTotales} ${prefViewModel.simboloMoneda}
-            - Beneficio: ${estadoInicio.beneficioMensual} ${prefViewModel.simboloMoneda}
+            - Ingresos: ${estadoDelNegocio.ingresosTotales} ${controladorDePreferencias.simboloMoneda}
+            - Gastos: ${estadoDelNegocio.gastosTotales} ${controladorDePreferencias.simboloMoneda}
+            - Beneficio: ${estadoDelNegocio.beneficioMensual} ${controladorDePreferencias.simboloMoneda}
         """.trimIndent()
     }
 
-    // Auto-scroll al recibir mensajes nuevos
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) {
-            scrollState.animateScrollToItem(messages.size - 1)
+    // Si la lista de mensajes cambia (porque mandamos uno), bajamos hasta el último
+    LaunchedEffect(listaDeMensajes.size) {
+        if (listaDeMensajes.isNotEmpty()) {
+            estadoDeLaLista.animateScrollToItem(listaDeMensajes.size - 1)
         }
     }
 
@@ -58,15 +66,17 @@ fun ChatScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        // Aquí mostramos todos los mensajes que hay en la conversación
         LazyColumn(
             modifier = Modifier.weight(1f),
-            state = scrollState,
+            state = estadoDeLaLista,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(messages) { msg ->
-                ChatBubble(msg)
+            items(listaDeMensajes) { mensajeSuelto ->
+                BurbujaDelMensaje(mensajeSuelto)
             }
-            if (isLoading) {
+            // Si la IA está buscando la respuesta, ponemos el circulito de espera
+            if (estaCargandoLaIA) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
@@ -77,58 +87,65 @@ fun ChatScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // La barra de abajo donde escribimos el mensaje
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             OutlinedTextField(
-                value = inputText,
-                onValueChange = { inputText = it },
+                value = textoEscritoPorElUsuario,
+                onValueChange = { textoEscritoPorElUsuario = it },
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("Escribe tu duda...") },
+                placeholder = { Text("Pregunta algo sobre tu negocio...") },
                 shape = RoundedCornerShape(24.dp),
                 maxLines = 3
             )
             Spacer(modifier = Modifier.width(8.dp))
             IconButton(
                 onClick = {
-                    if (inputText.isNotBlank()) {
-                        viewModel.sendMessage(inputText, contextText)
-                        inputText = ""
+                    if (textoEscritoPorElUsuario.isNotBlank()) {
+                        // Le decimos al controlador que mande el mensaje
+                        controladorDelChat.enviarMensaje(textoEscritoPorElUsuario, informacionDeLaEmpresa)
+                        // Borramos el texto para poder escribir otro nuevo
+                        textoEscritoPorElUsuario = ""
                     }
                 },
-                enabled = !isLoading && inputText.isNotBlank(),
+                // El botón solo se activa si hay texto y la IA no está ocupada
+                enabled = !estaCargandoLaIA && textoEscritoPorElUsuario.isNotBlank(),
                 colors = IconButtonDefaults.iconButtonColors(
                     contentColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Icon(Icons.Default.Send, contentDescription = "Enviar")
+                Icon(Icons.Default.Send, contentDescription = "Enviar mensaje")
             }
         }
     }
 }
 
+// Así es como se ve un solo mensaje en la pantalla
 @Composable
-fun ChatBubble(message: ChatMessage) {
-    val isUser = message.role == "user"
+fun BurbujaDelMensaje(mensaje: MensajeChat) {
+    // Comprobamos si el mensaje lo hemos escrito nosotros
+    val loHeEscritoYo = mensaje.quienEscribe == "user"
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = if (isUser) Alignment.End else Alignment.Start
+        // Si es nuestro mensaje lo ponemos a la derecha, si no a la izquierda
+        horizontalAlignment = if (loHeEscritoYo) Alignment.End else Alignment.Start
     ) {
         Surface(
-            color = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+            color = if (loHeEscritoYo) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
             shape = RoundedCornerShape(
                 topStart = 16.dp,
                 topEnd = 16.dp,
-                bottomStart = if (isUser) 16.dp else 0.dp,
-                bottomEnd = if (isUser) 0.dp else 16.dp
+                bottomStart = if (loHeEscritoYo) 16.dp else 0.dp,
+                bottomEnd = if (loHeEscritoYo) 0.dp else 16.dp
             ),
             tonalElevation = 2.dp
         ) {
             Text(
-                text = message.message,
+                text = mensaje.textoMensaje,
                 modifier = Modifier.padding(12.dp),
-                color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (loHeEscritoYo) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp
             )
         }

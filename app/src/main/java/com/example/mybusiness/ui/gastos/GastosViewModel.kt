@@ -10,19 +10,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class GastosViewModel(application: Application) : AndroidViewModel(application) {
+// Este componente controla todo el dinero que sale del negocio (compras, facturas, etc.)
+class GastosViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) {
 
-    private val repository = BusinessRepository.getInstance(application)
+    // El repositorio es el que sabe cómo guardar y borrar los gastos en la base de datos
+    private val repositorio = BusinessRepository.getInstance(aplicacion)
 
-    val gastos: StateFlow<List<Gasto>> = repository.todosLosGastos
+    // Esta es la lista de todos los gastos que hemos apuntado
+    val listaDeGastos: StateFlow<List<Gasto>> = repositorio.todosLosGastos
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun agregarGasto(concepto: String, monto: Double, fecha: Long, categoria: String, esFijo: Boolean = false) {
+    // Función para añadir un nuevo gasto a la lista
+    fun apuntarNuevoGasto(concepto: String, cantidad: Double, fecha: Long, categoria: String, esFijo: Boolean = false) {
         viewModelScope.launch {
-            repository.insertarGasto(
+            repositorio.insertarGasto(
                 Gasto(
                     concepto = concepto,
-                    cantidad = monto,
+                    cantidad = cantidad,
                     fecha = fecha,
                     categoria = categoria,
                     esFijo = esFijo
@@ -31,9 +35,10 @@ class GastosViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun eliminarGasto(gasto: Gasto) {
+    // Función para borrar un gasto si ya no lo queremos
+    fun borrarGasto(gasto: Gasto) {
         viewModelScope.launch {
-            repository.eliminarGasto(gasto)
+            repositorio.eliminarGasto(gasto)
         }
     }
 }

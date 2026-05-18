@@ -33,8 +33,8 @@ import com.example.mybusiness.ui.AnimacionEntradaLista
 import com.example.mybusiness.ui.EstadoVacio
 
 @Composable
-fun ClientesScreen(viewModel: ClientesViewModel) {
-    val clientes by viewModel.clientes.collectAsState()
+fun ClientesScreen(controladorClientes: ClientesViewModel) {
+    val clientes by controladorClientes.clientes.collectAsState()
     var mostrarDialogo by remember { mutableStateOf(false) }
     var clienteAEliminar by remember { mutableStateOf<Cliente?>(null) }
     var textoBusqueda by remember { mutableStateOf("") }
@@ -115,7 +115,7 @@ fun ClientesScreen(viewModel: ClientesViewModel) {
                 confirmButton = {
                     Button(
                         onClick = {
-                            clienteAEliminar?.let { viewModel.eliminarCliente(it) }
+                            clienteAEliminar?.let { controladorClientes.eliminarCliente(it) }
                             clienteAEliminar = null
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
@@ -135,7 +135,7 @@ fun ClientesScreen(viewModel: ClientesViewModel) {
             AgregarClienteDialog(
                 onDismiss = { mostrarDialogo = false },
                 onConfirm = { nombre, empresa, telefono, email ->
-                    viewModel.agregarCliente(nombre, empresa, telefono, email)
+                    controladorClientes.agregarCliente(nombre, empresa, telefono, email)
                     mostrarDialogo = false
                 }
             )
