@@ -5,7 +5,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface OpenRouterApi {
-    @POST("https://openrouter.ai/api/v1/chat/completions")
+    @POST("chat/completions")
     suspend fun getChatCompletion(
         @Header("Authorization") token: String,
         @Header("HTTP-Referer") referer: String = "https://mybusiness.example.com",

@@ -75,6 +75,7 @@
     <string name="back">Volver</string>
     <string name="settings">Configuración</string>
     <string name="company_name">Nombre de la Empresa</string>
+    <string name="company_description">¿A qué se dedica tu empresa? (Contexto para IA)</string>
     <string name="currency_symbol">Símbolo de Moneda:</string>
     <string name="app_theme">Tema de la App:</string>
     <string name="light">Claro</string>

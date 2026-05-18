@@ -20,12 +20,31 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mybusiness.R
 
+import com.example.mybusiness.ui.PreferenciasViewModel
+import com.example.mybusiness.ui.inicio.InicioViewModel
+
 @Composable
-fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
+fun ChatScreen(
+    viewModel: ChatViewModel = viewModel(),
+    inicioViewModel: InicioViewModel,
+    prefViewModel: PreferenciasViewModel
+) {
     val messages by viewModel.uiState.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val estadoInicio by inicioViewModel.estado.collectAsState()
     var inputText by remember { mutableStateOf("") }
     val scrollState = rememberLazyListState()
+
+    val contextText = remember(estadoInicio, prefViewModel.descripcionEmpresa) {
+        """
+            Empresa: ${prefViewModel.nombreEmpresa}
+            Descripción: ${prefViewModel.descripcionEmpresa}
+            Datos mes actual:
+            - Ingresos: ${estadoInicio.ingresosTotales} ${prefViewModel.simboloMoneda}
+            - Gastos: ${estadoInicio.gastosTotales} ${prefViewModel.simboloMoneda}
+            - Beneficio: ${estadoInicio.beneficioMensual} ${prefViewModel.simboloMoneda}
+        """.trimIndent()
+    }
 
     // Auto-scroll al recibir mensajes nuevos
     LaunchedEffect(messages.size) {
@@ -74,7 +93,7 @@ fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
             IconButton(
                 onClick = {
                     if (inputText.isNotBlank()) {
-                        viewModel.sendMessage(inputText)
+                        viewModel.sendMessage(inputText, contextText)
                         inputText = ""
                     }
                 },

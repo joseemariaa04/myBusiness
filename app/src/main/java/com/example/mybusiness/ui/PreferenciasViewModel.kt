@@ -24,6 +24,9 @@ class PreferenciasViewModel(application: Application) : AndroidViewModel(applica
     var cierreAutomatico by mutableStateOf(prefs.getBoolean("cierre_automatico", false))
         private set
 
+    var descripcionEmpresa by mutableStateOf(prefs.getString("descripcion_empresa", "") ?: "")
+        private set
+
     fun guardarNombreEmpresa(nuevoNombre: String) {
         nombreEmpresa = nuevoNombre
         prefs.edit().putString("nombre_empresa", nuevoNombre).apply()
@@ -48,5 +51,10 @@ class PreferenciasViewModel(application: Application) : AndroidViewModel(applica
     fun guardarCierreAutomatico(activado: Boolean) {
         cierreAutomatico = activado
         prefs.edit().putBoolean("cierre_automatico", activado).apply()
+    }
+
+    fun guardarDescripcionEmpresa(nuevaDescripcion: String) {
+        descripcionEmpresa = nuevaDescripcion
+        prefs.edit().putString("descripcion_empresa", nuevaDescripcion).apply()
     }
 }

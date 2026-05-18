@@ -157,7 +157,13 @@ fun MainApp(prefViewModel: PreferenciasViewModel) {
             composable(Screen.Ingresos.route) { IngresosScreen(viewModel = ingresosViewModel) }
             composable(Screen.Trabajadores.route) { TrabajadoresScreen(viewModel = trabajadoresViewModel) }
             composable(Screen.Clientes.route) { ClientesScreen(viewModel = clientesViewModel) }
-            composable(Screen.Chat.route) { ChatScreen(viewModel = chatViewModel) }
+            composable(Screen.Chat.route) { 
+                ChatScreen(
+                    viewModel = chatViewModel,
+                    inicioViewModel = inicioViewModel,
+                    prefViewModel = prefViewModel
+                ) 
+            }
             composable(
                 route = Screen.DetalleMes.route,
                 arguments = listOf(
@@ -194,6 +200,7 @@ fun DialogoConfiguracion(
     onDismiss: () -> Unit
 ) {
     var nombreTmp by remember { mutableStateOf(prefViewModel.nombreEmpresa) }
+    var descripcionTmp by remember { mutableStateOf(prefViewModel.descripcionEmpresa) }
     val monedas = listOf("€", "$", "£", "¥", "MXN")
 
     AlertDialog(
@@ -206,6 +213,14 @@ fun DialogoConfiguracion(
                     onValueChange = { nombreTmp = it },
                     label = { Text(stringResource(R.string.company_name)) },
                     modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = descripcionTmp,
+                    onValueChange = { descripcionTmp = it },
+                    label = { Text(stringResource(R.string.company_description)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
                 )
                 
                 Text(stringResource(R.string.currency_symbol), fontWeight = FontWeight.Bold)
@@ -254,6 +269,7 @@ fun DialogoConfiguracion(
         confirmButton = {
             Button(onClick = {
                 prefViewModel.guardarNombreEmpresa(nombreTmp)
+                prefViewModel.guardarDescripcionEmpresa(descripcionTmp)
                 onDismiss()
             }) {
                 Text(stringResource(R.string.save))

@@ -18,7 +18,7 @@ data class ReasoningConfig(
 @JsonClass(generateAdapter = true)
 data class OpenRouterMessage(
     val role: String,
-    val content: String?,
+    val content: String? = null,
     val reasoning: String? = null,
     @Json(name = "reasoning_details") val reasoningDetails: List<ReasoningDetail>? = null
 )

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mybusiness.data.api.OpenRouterMessage
 import com.example.mybusiness.data.api.OpenRouterRequest
-import com.example.mybusiness.data.api.ReasoningConfig
 import com.example.mybusiness.data.api.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,10 +17,10 @@ data class ChatMessage(
 class ChatViewModel : ViewModel() {
 
     // NOTA: Genera una clave nueva si esta ha sido expuesta.
-    private val API_KEY = "API_KEY"
+    private val API_KEY = "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"
     
-    // Modelo experimental con razonamiento (Reasoning)
-    private val MODEL_ID = "inclusionai/ring-2.6-1t:free"
+    // Modelo Owl Alpha para razonamiento avanzado
+    private val MODEL_ID = "openrouter/owl-alpha"
 
     private val _uiState = MutableStateFlow<List<ChatMessage>>(listOf(
         ChatMessage("assistant", "¡Hola! Soy tu asistente de myBusiness. ¿En qué puedo ayudarte hoy?")
@@ -31,13 +30,14 @@ class ChatViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
-    private val messageHistory = mutableListOf(
-        OpenRouterMessage("system", "Eres el asistente inteligente de myBusiness. Ayuda con contabilidad y gestión de forma breve. Responde siempre en español."),
-        OpenRouterMessage("assistant", "¡Hola! Soy tu asistente de myBusiness. ¿En qué puedo ayudarte hoy?")
-    )
+    private val messageHistory = mutableListOf<OpenRouterMessage>()
 
-    fun sendMessage(userText: String) {
+    fun sendMessage(userText: String, context: String = "") {
         if (userText.isBlank() || _isLoading.value) return
+
+        if (messageHistory.isEmpty()) {
+            messageHistory.add(OpenRouterMessage("system", "Eres el asistente inteligente de myBusiness. Ayuda con contabilidad y gestión de forma breve. Responde siempre en español. Contexto actual: $context"))
+        }
 
         // Mantener el historial corto para evitar errores 429 por exceso de tokens
         if (messageHistory.size > 10) {
@@ -59,18 +59,19 @@ class ChatViewModel : ViewModel() {
             try {
                 val request = OpenRouterRequest(
                     model = MODEL_ID,
-                    messages = messageHistory,
-                    reasoning = ReasoningConfig(enabled = true)
+                    messages = messageHistory
                 )
-                val response = RetrofitClient.openRouterApi.getChatCompletion(token = API_KEY, request = request)
+                val response = RetrofitClient.openRouterApi.getChatCompletion(token = "Bearer $API_KEY", request = request)
                 
                 _isLoading.value = false
-                response.choices.firstOrNull()?.message?.let { 
-                    messageHistory.add(it)
+                response.choices.firstOrNull()?.message?.let { msg ->
+                    messageHistory.add(msg)
                     val updatedUiMessages = _uiState.value.toMutableList()
-                    // Si content es nulo, usamos reasoning_details para la UI
-                    val textToShow = it.content ?: it.reasoningDetails ?: ""
-                    updatedUiMessages.add(ChatMessage("assistant", textToShow.toString()))
+                    
+                    // El modelo Owl Alpha puede devolver el razonamiento en el campo 'reasoning'
+                    val textToShow = msg.reasoning ?: msg.content ?: ""
+
+                    updatedUiMessages.add(ChatMessage("assistant", textToShow))
                     _uiState.value = updatedUiMessages
                 }
             } catch (e: Exception) {
