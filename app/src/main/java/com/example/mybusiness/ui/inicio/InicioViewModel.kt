@@ -24,7 +24,12 @@ data class EstadoInicio(
     val beneficioMensual: Double = 0.0,
     val ingresosTotales: Double = 0.0,
     val gastosTotales: Double = 0.0,
-    val historial: List<HistorialMes> = emptyList()
+    val historial: List<HistorialMes> = emptyList(),
+    val varBeneficio: Double? = null,
+    val varIngresos: Double? = null,
+    val varGastos: Double? = null,
+    val desgloseIngresos: Map<String, Double> = emptyMap(),
+    val desgloseGastos: Map<String, Double> = emptyMap()
 )
 
 class InicioViewModel(application: Application) : AndroidViewModel(application) {
@@ -94,12 +99,47 @@ class InicioViewModel(application: Application) : AndroidViewModel(application) 
         val salarioActivos = trabajadores.filter { it.activo }.sumOf { it.salario }
         val totalIngresos = ingresos.sumOf { it.cantidad }
         val totalGastos = gastos.sumOf { it.cantidad } + salarioActivos
+        val beneficioActual = totalIngresos - totalGastos
+
+        // Tomamos el mes anterior (el último cerrado) para comparar
+        // El historial suele venir ordenado por fecha desc o asc, supongamos desc o que el primero es el más reciente
+        // Según el código previo en InicioScreen: historial.reversed() se usa para la gráfica (orden cronológico)
+        // Entonces historial.firstOrNull() debería ser el mes más reciente cerrado.
+        val ultimoMes = historial.firstOrNull()
+        
+        fun calcularVariacion(actual: Double, anterior: Double?): Double? {
+            if (anterior == null || anterior == 0.0) return null
+            // Variación porcentual: ((actual - anterior) / anterior) * 100
+            // Si el actual es 0 y el anterior es 100, la variación es -100%
+            // Si el actual es 500 y el anterior es 100, la variación es +400%
+            // Si el actual es 20 y el anterior es 100, la variación es -80%
+            return ((actual - anterior) / Math.abs(anterior)) * 100
+        }
+
+        val desgloseIngresos: Map<String, Double> = ingresos.groupBy { it.categoria }
+            .mapValues { entry -> entry.value.sumOf { it.cantidad } }
+            .filter { it.value > 0.0 }
+
+        val desgloseGastosBase: MutableMap<String, Double> = gastos.groupBy { it.categoria }
+            .mapValues { entry -> entry.value.sumOf { it.cantidad } }
+            .toMutableMap()
+        
+        if (salarioActivos > 0.0) {
+            val etiquetaSueldos = getApplication<Application>().getString(R.string.salario)
+            desgloseGastosBase[etiquetaSueldos] = (desgloseGastosBase[etiquetaSueldos] ?: 0.0) + salarioActivos
+        }
+        val desgloseGastos: Map<String, Double> = desgloseGastosBase.filter { it.value > 0.0 }
 
         EstadoInicio(
-            beneficioMensual = totalIngresos - totalGastos,
+            beneficioMensual = beneficioActual,
             ingresosTotales = totalIngresos,
             gastosTotales = totalGastos,
-            historial = historial
+            historial = historial,
+            varBeneficio = calcularVariacion(beneficioActual, ultimoMes?.beneficio),
+            varIngresos = calcularVariacion(totalIngresos, ultimoMes?.ingresosTotales),
+            varGastos = calcularVariacion(totalGastos, ultimoMes?.gastosTotales),
+            desgloseIngresos = desgloseIngresos,
+            desgloseGastos = desgloseGastos
         )
     }.stateIn(
         scope = viewModelScope,

@@ -86,11 +86,15 @@ fun InicioScreen(
     val listaCategorias by catViewModel.categorias.collectAsState()
     
     var mostrarDialogoCategorias by remember { mutableStateOf(false) }
+    var desgloseATostrar by remember { mutableStateOf<Pair<String, Map<String, Double>>?>(null) }
 
     val beneficioMensual = estado.beneficioMensual
     val ingresosTotales = estado.ingresosTotales
     val gastosTotales = estado.gastosTotales
     val historial = estado.historial
+    val varBeneficio = estado.varBeneficio
+    val varIngresos = estado.varIngresos
+    val varGastos = estado.varGastos
 
     LazyColumn(
         modifier = Modifier
@@ -107,10 +111,10 @@ fun InicioScreen(
             val colorBeneficio = if (esPositivo) MaterialTheme.colorScheme.primary else Color(0xFFFF5252)
             val iconoBeneficio = if (esPositivo) Icons.AutoMirrored.Filled.TrendingUp else Icons.AutoMirrored.Filled.TrendingDown
 
-            Card(
+                    Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp),
+                    .height(160.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -136,12 +140,24 @@ fun InicioScreen(
                             tint = colorBeneficio
                         )
                     }
-                    Text(
-                        text = "${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", beneficioMensual)}",
-                        color = colorBeneficio,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column {
+                        Text(
+                            text = "${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", beneficioMensual)}",
+                            color = colorBeneficio,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (varBeneficio != null) {
+                            val esVarPositiva = varBeneficio >= 0
+                            val colorVar = if (esVarPositiva) MaterialTheme.colorScheme.primary else Color(0xFFFF5252)
+                            val textoVar = String.format(Locale.getDefault(), "%+.1f%%", varBeneficio)
+                            Text(
+                                text = "$textoVar vs mes anterior",
+                                color = colorVar,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
                     
                     val ratio = if (ingresosTotales > 0) {
                         (gastosTotales / ingresosTotales).toFloat().coerceIn(0f, 1f)
@@ -161,23 +177,35 @@ fun InicioScreen(
         }
 
         item {
+            val tituloIngresos = stringResource(R.string.income)
+            val tituloGastos = stringResource(R.string.expenses)
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 ResumenCard(
-                    titulo = stringResource(R.string.income),
+                    titulo = tituloIngresos,
                     monto = ingresosTotales,
                     icono = Icons.Default.ArrowUpward,
                     colorIcono = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.weight(1.0f)
+                    variacion = varIngresos,
+                    modifier = Modifier.weight(1.0f),
+                    onClick = { 
+                        desgloseATostrar = tituloIngresos to estado.desgloseIngresos 
+                    }
                 )
                 ResumenCard(
-                    titulo = stringResource(R.string.expenses),
+                    titulo = tituloGastos,
                     monto = gastosTotales,
                     icono = Icons.Default.ArrowDownward,
                     colorIcono = Color(0xFFFF5252),
-                    modifier = Modifier.weight(1.0f)
+                    variacion = varGastos,
+                    inverso = true,
+                    modifier = Modifier.weight(1.0f),
+                    onClick = { 
+                        desgloseATostrar = tituloGastos to estado.desgloseGastos
+                    }
                 )
             }
         }
@@ -236,6 +264,34 @@ fun InicioScreen(
                 catViewModel.agregarCategoria(nombre, esIngreso, icono)
             },
             onEliminar = { catViewModel.eliminarCategoria(it) }
+        )
+    }
+
+    desgloseATostrar?.let { (titulo, datos) ->
+        AlertDialog(
+            onDismissRequest = { desgloseATostrar = null },
+            title = { Text(titulo) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    datos.forEach { (cat, monto) ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = cat, modifier = Modifier.weight(1f))
+                            Text(
+                                text = "${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", monto)}",
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { desgloseATostrar = null }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
         )
     }
 }
@@ -555,10 +611,15 @@ fun ResumenCard(
     icono: ImageVector,
     colorIcono: Color,
     modifier: Modifier = Modifier,
+    variacion: Double? = null,
+    inverso: Boolean = false,
+    onClick: (() -> Unit)? = null,
     prefViewModel: PreferenciasViewModel = viewModel()
 ) {
     Card(
-        modifier = modifier.height(100.dp),
+        modifier = modifier
+            .height(110.dp)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -576,12 +637,28 @@ fun ResumenCard(
                 Text(text = titulo, color = Color.Gray, fontSize = 12.sp)
                 Icon(imageVector = icono, contentDescription = null, tint = colorIcono, modifier = Modifier.size(16.dp))
             }
-            Text(
-                text = "${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", monto)}",
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Column {
+                Text(
+                    text = "${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", monto)}",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                if (variacion != null) {
+                    val esPositiva = variacion >= 0
+                    val colorVariacion = if (inverso) {
+                        if (esPositiva) Color(0xFFFF5252) else MaterialTheme.colorScheme.primary
+                    } else {
+                        if (esPositiva) MaterialTheme.colorScheme.primary else Color(0xFFFF5252)
+                    }
+                    val textoVariacion = String.format(Locale.getDefault(), "%+.1f%%", variacion)
+                    Text(
+                        text = "$textoVariacion vs mes anterior",
+                        color = colorVariacion,
+                        fontSize = 10.sp
+                    )
+                }
+            }
         }
     }
 }
