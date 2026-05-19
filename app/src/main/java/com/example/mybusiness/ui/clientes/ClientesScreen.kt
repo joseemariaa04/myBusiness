@@ -32,19 +32,25 @@ import com.example.mybusiness.data.Cliente
 import com.example.mybusiness.ui.AnimacionEntradaLista
 import com.example.mybusiness.ui.EstadoVacio
 
+// Esta pantalla sirve para gestionar nuestra lista de clientes y sus datos de contacto
 @Composable
 fun ClientesScreen(controladorClientes: ClientesViewModel) {
+    // Obtenemos la lista de clientes que el controlador tiene guardada
     val clientes by controladorClientes.clientes.collectAsState()
+    
+    // Estados para controlar si se ve el formulario de añadir o el de borrar
     var mostrarDialogo by remember { mutableStateOf(false) }
     var clienteAEliminar by remember { mutableStateOf<Cliente?>(null) }
     var textoBusqueda by remember { mutableStateOf("") }
 
+    // Filtramos los clientes por nombre o empresa según lo que escribamos en el buscador
     val clientesFiltrados = clientes.filter {
         it.nombre.contains(textoBusqueda, ignoreCase = true) || it.empresa.contains(textoBusqueda, ignoreCase = true)
     }
 
     Scaffold(
         floatingActionButton = {
+            // Botón "+" para añadir un cliente nuevo
             FloatingActionButton(
                 onClick = { mostrarDialogo = true },
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -69,7 +75,7 @@ fun ClientesScreen(controladorClientes: ClientesViewModel) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Barra de Búsqueda
+            // Barra de Búsqueda para encontrar clientes rápido
             OutlinedTextField(
                 value = textoBusqueda,
                 onValueChange = { textoBusqueda = it },
@@ -85,6 +91,7 @@ fun ClientesScreen(controladorClientes: ClientesViewModel) {
                 )
             )
 
+            // Si no hay clientes que mostrar, ponemos el aviso de "Vacío"
             if (clientesFiltrados.isEmpty()) {
                 EstadoVacio(
                     mensaje = stringResource(R.string.no_clients),
@@ -92,6 +99,7 @@ fun ClientesScreen(controladorClientes: ClientesViewModel) {
                     icono = Icons.Default.BusinessCenter
                 )
             } else {
+                // Si hay clientes, los enseñamos en una lista
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -107,6 +115,7 @@ fun ClientesScreen(controladorClientes: ClientesViewModel) {
             }
         }
 
+        // Diálogo para confirmar si de verdad queremos borrar a un cliente
         if (clienteAEliminar != null) {
             AlertDialog(
                 onDismissRequest = { clienteAEliminar = null },
@@ -131,6 +140,7 @@ fun ClientesScreen(controladorClientes: ClientesViewModel) {
             )
         }
 
+        // El formulario que se abre para rellenar los datos del nuevo cliente
         if (mostrarDialogo) {
             AgregarClienteDialog(
                 onDismiss = { mostrarDialogo = false },
@@ -143,6 +153,7 @@ fun ClientesScreen(controladorClientes: ClientesViewModel) {
     }
 }
 
+// Así es como se ve la tarjeta de cada cliente en la lista
 @Composable
 fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
     val context = LocalContext.current
@@ -156,6 +167,7 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Icono de edificio para representar a la empresa
                 Box(
                     modifier = Modifier
                         .size(48.dp)
@@ -179,6 +191,7 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
                         color = Color.Gray
                     )
                 }
+                // Botón para llamar por teléfono
                 IconButton(onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
                         data = Uri.parse("tel:${cliente.telefono}")
@@ -187,6 +200,7 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
                 }) {
                     Icon(Icons.Default.Phone, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
                 }
+                // Botón para enviar un correo electrónico
                 IconButton(onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = Uri.parse("mailto:${cliente.email}")
@@ -195,6 +209,7 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
                 }) {
                     Icon(Icons.Default.Email, contentDescription = stringResource(R.string.send_email), tint = MaterialTheme.colorScheme.secondary)
                 }
+                // Botón de papelera para eliminar al cliente
                 IconButton(onClick = onDelete) {
                     Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Gray)
                 }
@@ -203,6 +218,7 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
     }
 }
 
+// El cuadro que aparece para escribir los datos del nuevo cliente
 @Composable
 fun AgregarClienteDialog(onDismiss: () -> Unit, onConfirm: (String, String, String, String) -> Unit) {
     var nombre by remember { mutableStateOf("") }
@@ -219,6 +235,7 @@ fun AgregarClienteDialog(onDismiss: () -> Unit, onConfirm: (String, String, Stri
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
+                // Campos de texto para rellenar la información
                 OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text(stringResource(R.string.contact_name)) }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = empresa, onValueChange = { empresa = it }, label = { Text(stringResource(R.string.company)) }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = telefono, onValueChange = { telefono = it }, label = { Text(stringResource(R.string.phone)) }, modifier = Modifier.fillMaxWidth())
@@ -228,6 +245,7 @@ fun AgregarClienteDialog(onDismiss: () -> Unit, onConfirm: (String, String, Stri
         confirmButton = {
             Button(onClick = {
                 val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$".toRegex()
+                // Validamos que no haya huecos vacíos y que el email y teléfono parezcan correctos
                 if (nombre.isBlank() || empresa.isBlank() || telefono.isBlank() || email.isBlank()) {
                     Toast.makeText(context, context.getString(R.string.all_fields_required), Toast.LENGTH_SHORT).show()
                 } else if (!email.matches(emailRegex)) {
@@ -248,3 +266,4 @@ fun AgregarClienteDialog(onDismiss: () -> Unit, onConfirm: (String, String, Stri
         }
     )
 }
+

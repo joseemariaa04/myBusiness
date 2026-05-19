@@ -5,6 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+// Esta clase define qué información guardamos de cada gasto (dinero que sale)
 @Entity(
     tableName = "gastos",
     foreignKeys = [
@@ -20,10 +21,11 @@ import androidx.room.PrimaryKey
 data class Gasto(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val concepto: String,
-    val cantidad: Double,
-    val fecha: Long,
-    val categoria: String,
-    val mesId: Int? = null,
-    val esFijo: Boolean = false
+    val concepto: String, // ¿En qué hemos gastado el dinero?
+    val cantidad: Double, // ¿Cuánto dinero ha sido?
+    val fecha: Long, // ¿Cuándo ocurrió?
+    val categoria: String, // ¿Qué tipo de gasto es? (ej. Luz, Alquiler)
+    val mesId: Int? = null, // Para saber a qué mes del historial pertenece
+    val esFijo: Boolean = false // Si es un gasto que se repite todos los meses
 )
+

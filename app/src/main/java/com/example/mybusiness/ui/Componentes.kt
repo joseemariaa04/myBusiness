@@ -18,6 +18,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// Este objeto guarda una lista de iconos que podemos usar para las categorías.
+// Así no tenemos que estar buscándolos por todo el código, están todos aquí centralizados.
 object IconosCategoria {
     val mapa = mapOf(
         "Sell" to Icons.Default.Sell,
@@ -37,11 +39,14 @@ object IconosCategoria {
         "Redeem" to Icons.Default.Redeem
     )
 
+    // Esta función busca un icono por su nombre. Si no lo encuentra, pone uno por defecto.
     fun obtenerIcono(nombre: String?): ImageVector {
         return mapa[nombre] ?: Icons.Default.Category
     }
 }
 
+// Este componente sirve para cuando no hay datos que mostrar (por ejemplo, una lista vacía).
+// Pone un dibujo grande y un par de textos explicando qué pasa.
 @Composable
 fun EstadoVacio(
     mensaje: String,
@@ -80,6 +85,8 @@ fun EstadoVacio(
     }
 }
 
+// Esta función hace que los elementos de una lista no aparezcan de golpe,
+// sino que vayan entrando con una animación suave de abajo hacia arriba.
 @Composable
 fun AnimacionEntradaLista(
     indice: Int,

@@ -58,11 +58,13 @@ fun InicioScreen(
     onVerDetalleMes: (Int, String) -> Unit,
     prefViewModel: PreferenciasViewModel
 ) {
+    // Aquí guardamos el estado de la pantalla (los datos que van cambiando)
     val estado by viewModel.estado.collectAsState()
     val contexto = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // Detectar cambios de fecha al volver a la aplicación (útil si el usuario cambia la fecha en ajustes)
+    // Este bloque sirve para vigilar cuándo el usuario entra o sale de la app.
+    // Si vuelve a la app (ON_RESUME), miramos si ha pasado un mes nuevo para cerrar el anterior.
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -75,19 +77,22 @@ fun InicioScreen(
         }
     }
 
+    // Para enseñar avisos (como mensajes de error o éxito) que manda el ViewModel
     LaunchedEffect(Unit) {
         viewModel.eventosDeAviso.collect { mensaje ->
             Toast.makeText(contexto, mensaje, Toast.LENGTH_LONG).show()
         }
     }
     
-    // Obtenemos el viewModel de categorías
+    // Cogemos las categorías de la base de datos para saber cómo clasificar el dinero
     val catViewModel: CategoriasViewModel = viewModel()
     val listaCategorias by catViewModel.categorias.collectAsState()
     
+    // Variables locales para controlar qué se ve en la pantalla en cada momento
     var mostrarDialogoCategorias by remember { mutableStateOf(false) }
     var desgloseATostrar by remember { mutableStateOf<Pair<String, Map<String, Double>>?>(null) }
 
+    // Sacamos los números importantes para que sea más fácil usarlos abajo
     val beneficioMensual = estado.beneficioMensual
     val ingresosTotales = estado.ingresosTotales
     val gastosTotales = estado.gastosTotales
@@ -96,6 +101,7 @@ fun InicioScreen(
     val varIngresos = estado.variacionIngresos
     val varGastos = estado.variacionGastos
 
+    // Una lista que se puede deslizar de arriba a abajo
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -106,12 +112,12 @@ fun InicioScreen(
         item {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Tarjeta de Beneficio Mensual Actual
+            // Tarjeta principal que enseña cuánto dinero hemos ganado este mes
             val esPositivo = beneficioMensual >= 0
             val colorBeneficio = if (esPositivo) MaterialTheme.colorScheme.primary else Color(0xFFFF5252)
             val iconoBeneficio = if (esPositivo) Icons.AutoMirrored.Filled.TrendingUp else Icons.AutoMirrored.Filled.TrendingDown
 
-                    Card(
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp),
@@ -141,12 +147,14 @@ fun InicioScreen(
                         )
                     }
                     Column {
+                        // El número grande del beneficio con el símbolo de la moneda
                         Text(
                             text = "${prefViewModel.simboloMoneda}${String.format(Locale.getDefault(), "%,.2f", beneficioMensual)}",
                             color = colorBeneficio,
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold
                         )
+                        // Si tenemos datos del mes pasado, comparamos si hemos ganado más o menos
                         if (varBeneficio != null) {
                             val esVarPositiva = varBeneficio >= 0
                             val colorVar = if (esVarPositiva) MaterialTheme.colorScheme.primary else Color(0xFFFF5252)
@@ -159,6 +167,7 @@ fun InicioScreen(
                         }
                     }
                     
+                    // Una barrita de progreso que enseña la relación entre gastos e ingresos
                     val ratio = if (ingresosTotales > 0) {
                         (gastosTotales / ingresosTotales).toFloat().coerceIn(0f, 1f)
                     } else if (gastosTotales > 0) 1f else 0f
