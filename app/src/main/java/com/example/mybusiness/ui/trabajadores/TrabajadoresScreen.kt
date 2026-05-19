@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.mybusiness.R
 import com.example.mybusiness.data.Trabajador
 import com.example.mybusiness.ui.AnimacionEntradaLista
@@ -266,9 +268,21 @@ fun DialogoParaContratar(alCerrar: () -> Unit, alGuardar: (String, String, Strin
             ) {
                 OutlinedTextField(value = queNombre, onValueChange = { queNombre = it }, label = { Text(stringResource(R.string.name)) }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = quePuesto, onValueChange = { quePuesto = it }, label = { Text(stringResource(R.string.position)) }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = queTelefono, onValueChange = { queTelefono = it }, label = { Text(stringResource(R.string.phone)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = queTelefono,
+                    onValueChange = { queTelefono = it },
+                    label = { Text(stringResource(R.string.phone)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                )
                 OutlinedTextField(value = queEmail, onValueChange = { queEmail = it }, label = { Text(stringResource(R.string.email)) }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = queSalario, onValueChange = { queSalario = it }, label = { Text(stringResource(R.string.salario)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = queSalario,
+                    onValueChange = { queSalario = it },
+                    label = { Text(stringResource(R.string.salario)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = estaTrabajandoYa, onCheckedChange = { estaTrabajandoYa = it })
                     Text(stringResource(R.string.active_worker))

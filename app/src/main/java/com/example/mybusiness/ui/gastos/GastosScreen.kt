@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.mybusiness.R
 import com.example.mybusiness.data.Gasto
 import com.example.mybusiness.ui.AnimacionEntradaLista
@@ -245,7 +247,13 @@ fun DialogoParaAñadirGasto(
                 // Hueco para el nombre del gasto
                 OutlinedTextField(value = queEs, onValueChange = { queEs = it }, label = { Text(stringResource(R.string.concept)) }, modifier = Modifier.fillMaxWidth())
                 // Hueco para el dinero
-                OutlinedTextField(value = cuantoDinero, onValueChange = { cuantoDinero = it }, label = { Text(stringResource(R.string.salary)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = cuantoDinero,
+                    onValueChange = { cuantoDinero = it },
+                    label = { Text(stringResource(R.string.salary)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                )
 
                 Text(stringResource(R.string.select_category), fontWeight = FontWeight.Bold)
                 // Lista de burbujas para elegir la categoría
