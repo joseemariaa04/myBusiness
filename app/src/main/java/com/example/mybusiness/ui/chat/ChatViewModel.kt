@@ -54,7 +54,7 @@ class ChatViewModel : ViewModel() {
             "No uses Markdown.\n" +
             "No uses **negritas**, *, #, -, tablas con |, backticks\n" +
             "No formatees código.\n" +
-            "Devuelve únicamente texto simple y limpio., puedes usar emojis si quieres") {
+            "Devuelve únicamente texto simple y limpio., puedes usar emojis si quieres, responde en el idioma que te pregunten") {
         // Si no han escrito nada o ya estamos esperando respuesta, no hacemos nada
         if (textoDelUsuario.isBlank() || _estaCargando.value) return
 
