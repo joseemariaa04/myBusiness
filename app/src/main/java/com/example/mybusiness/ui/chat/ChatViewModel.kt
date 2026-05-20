@@ -105,7 +105,8 @@ class ChatViewModel : ViewModel() {
                         if (error.code() == 429) "Servicio saturado. Por favor, espera 15 segundos."
                         else "Error ${error.code()}"
                     }
-                    else -> "Error de conexión"
+                    is java.net.SocketTimeoutException -> "La IA está tardando mucho en responder. Reintenta en un momento."
+                    else -> "Error de conexión: ${error.localizedMessage}"
                 }
                 _estadoMensajes.update { it + MensajeChat("assistant", "Sistema: $detalleError", esError = true) }
             } finally {

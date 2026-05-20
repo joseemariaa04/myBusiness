@@ -30,13 +30,16 @@ object RetrofitClient {
             override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
         })
 
-        val contextoSSL = SSLContext.getInstance("SSL")
+        val contextoSSL = SSLContext.getInstance("TLS")
         contextoSSL.init(null, gestorConfianza, SecureRandom())
         
         return OkHttpClient.Builder()
             .sslSocketFactory(contextoSSL.socketFactory, gestorConfianza[0] as X509TrustManager)
             .hostnameVerifier { _, _ -> true }
             .addInterceptor(interceptorLog)
+            .connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
             .build()
     }
 
