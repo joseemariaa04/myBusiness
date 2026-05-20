@@ -36,14 +36,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.mybusiness.R
 import com.example.mybusiness.data.Categoria
+import com.example.mybusiness.data.Cliente
 import com.example.mybusiness.ui.IconosCategoria
 import com.example.mybusiness.ui.PreferenciasViewModel
+import com.example.mybusiness.ui.clientes.ClientesViewModel
 
 // Esta pantalla sirve para ver y anotar el dinero que va entrando al negocio
 @Composable
-fun IngresosScreen(controladorIngresos: IngresosViewModel, controladorPreferencias: PreferenciasViewModel = viewModel()) {
+fun IngresosScreen(
+    controladorIngresos: IngresosViewModel, 
+    controladorPreferencias: PreferenciasViewModel = viewModel(),
+    controladorClientes: ClientesViewModel = viewModel()
+) {
     // Escuchamos la lista de ingresos que nos da el controlador
     val listaActualIngresos by controladorIngresos.listaDeIngresos.collectAsState()
+    
+    // Obtenemos los clientes para poder asociarlos a los ingresos
+    val listaClientes by controladorClientes.clientes.collectAsState()
     
     // Necesitamos las categorías para poder clasificar los ingresos
     val catViewModel: CategoriasViewModel = viewModel()
@@ -94,8 +103,10 @@ fun IngresosScreen(controladorIngresos: IngresosViewModel, controladorPreferenci
                 ) {
                     itemsIndexed(listaActualIngresos) { indice, unIngreso ->
                         AnimacionEntradaLista(indice = indice) {
+                            val clienteAsociado = listaClientes.find { it.id == unIngreso.clienteId }
                             TarjetaDeIngreso(
                                 elIngreso = unIngreso as Ingreso,
+                                nombreCliente = clienteAsociado?.empresa ?: clienteAsociado?.nombre,
                                 alBorrar = { ingresoABorrar = unIngreso as Ingreso },
                                 pref = controladorPreferencias
                             )
@@ -111,9 +122,10 @@ fun IngresosScreen(controladorIngresos: IngresosViewModel, controladorPreferenci
             val categoriasParaIngresos = listaCategorias.filter { it.esIngreso }
             DialogoParaAñadirIngreso(
                 listaDeCategorias = if (categoriasParaIngresos.isEmpty()) listOf(Categoria(nombre = "Venta", esIngreso = true, iconoNombre = "Sell")) else categoriasParaIngresos,
+                listaClientes = listaClientes,
                 alCerrar = { mostrarCuadroNuevo = false },
-                alGuardar = { concepto, dinero, categoria, esFijo ->
-                    controladorIngresos.apuntarNuevoIngreso(concepto, dinero, System.currentTimeMillis(), categoria, esFijo)
+                alGuardar = { concepto, dinero, categoria, esFijo, idCliente ->
+                    controladorIngresos.apuntarNuevoIngreso(concepto, dinero, System.currentTimeMillis(), categoria, esFijo, idCliente)
                     mostrarCuadroNuevo = false
                 }
             )
@@ -150,6 +162,7 @@ fun IngresosScreen(controladorIngresos: IngresosViewModel, controladorPreferenci
 @Composable
 fun TarjetaDeIngreso(
     elIngreso: Ingreso, 
+    nombreCliente: String? = null,
     alBorrar: () -> Unit, 
     pref: PreferenciasViewModel, 
     catViewModel: CategoriasViewModel = viewModel()
@@ -197,6 +210,15 @@ fun TarjetaDeIngreso(
                         )
                     }
                 }
+                // Si el ingreso viene de un cliente, lo ponemos debajo del nombre
+                if (nombreCliente != null) {
+                    Text(
+                        text = "Cliente: $nombreCliente",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
                 // Ponemos el día y la hora en que se anotó
                 Text(
                     text = SimpleDateFormat("dd MMM, h:mm a", Locale.getDefault()).format(Date(elIngreso.fecha)),
@@ -230,13 +252,16 @@ fun TarjetaDeIngreso(
 @Composable
 fun DialogoParaAñadirIngreso(
     listaDeCategorias: List<Categoria>,
+    listaClientes: List<Cliente>,
     alCerrar: () -> Unit,
-    alGuardar: (String, Double, String, Boolean) -> Unit
+    alGuardar: (String, Double, String, Boolean, Int?) -> Unit
 ) {
     var queEs by remember { mutableStateOf("") }
     var cuantoDinero by remember { mutableStateOf("") }
     var queCategoria by remember { mutableStateOf(listaDeCategorias.first().nombre) }
+    var idClienteSeleccionado by remember { mutableStateOf<Int?>(null) }
     var seRepiteSiempre by remember { mutableStateOf(false) }
+    var expandido by remember { mutableStateOf(false) }
     val aviso = LocalContext.current
 
     AlertDialog(
@@ -257,6 +282,33 @@ fun DialogoParaAñadirIngreso(
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
+
+                // Selector de Cliente
+                if (listaClientes.isNotEmpty()) {
+                    Text("Asignar a cliente (Opcional):", fontWeight = FontWeight.Bold)
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(
+                            onClick = { expandido = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            val clienteActual = listaClientes.find { it.id == idClienteSeleccionado }
+                            Text(clienteActual?.empresa ?: clienteActual?.nombre ?: "Ningún cliente")
+                        }
+                        DropdownMenu(expanded = expandido, onDismissRequest = { expandido = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Ninguno") },
+                                onClick = { idClienteSeleccionado = null; expandido = false }
+                            )
+                            listaClientes.forEach { cliente ->
+                                DropdownMenuItem(
+                                    text = { Text(cliente.empresa) },
+                                    onClick = { idClienteSeleccionado = cliente.id; expandido = false }
+                                )
+                            }
+                        }
+                    }
+                }
 
                 Text(stringResource(R.string.select_category), fontWeight = FontWeight.Bold)
                 // Lista de burbujas para elegir la categoría
@@ -295,7 +347,7 @@ fun DialogoParaAñadirIngreso(
                 } else if (numeroDinero == null) {
                     Toast.makeText(aviso, aviso.getString(R.string.invalid_amount), Toast.LENGTH_SHORT).show()
                 } else {
-                    alGuardar(queEs, numeroDinero, queCategoria, seRepiteSiempre)
+                    alGuardar(queEs, numeroDinero, queCategoria, seRepiteSiempre, idClienteSeleccionado)
                 }
             }) {
                 Text(stringResource(R.string.add))

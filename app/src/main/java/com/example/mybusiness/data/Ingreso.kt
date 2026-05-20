@@ -13,7 +13,7 @@ import androidx.room.PrimaryKey
             entity = Cliente::class,
             parentColumns = ["id"],
             childColumns = ["clienteId"],
-            onDelete = ForeignKey.SET_NULL
+            onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = HistorialMes::class,

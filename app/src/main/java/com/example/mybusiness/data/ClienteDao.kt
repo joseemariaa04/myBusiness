@@ -3,9 +3,26 @@ package com.example.mybusiness.data
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
+// Clase auxiliar para guardar el cliente junto con todo el dinero que nos ha pagado.
+data class ClienteConTotal(
+    @Embedded val cliente: Cliente,
+    val totalGastado: Double
+)
+
 // El DAO para gestionar los CLIENTES.
 @Dao
 interface ClienteDao {
+    // Saca todos nuestros clientes y calcula cuánto dinero nos han pagado en total sumando todos sus ingresos.
+    // Esto es genial porque el número no se borra aunque pase el tiempo.
+    @Query("""
+        SELECT clientes.*, COALESCE(SUM(ingresos.cantidad), 0.0) as totalGastado 
+        FROM clientes 
+        LEFT JOIN ingresos ON clientes.id = ingresos.clienteId 
+        GROUP BY clientes.id 
+        ORDER BY clientes.nombre ASC
+    """)
+    fun obtenerClientesConTotal(): Flow<List<ClienteConTotal>>
+
     // Saca todos nuestros clientes ordenados por su nombre (de la A a la Z).
     @Query("SELECT * FROM clientes ORDER BY nombre ASC")
     fun obtenerTodos(): Flow<List<Cliente>>

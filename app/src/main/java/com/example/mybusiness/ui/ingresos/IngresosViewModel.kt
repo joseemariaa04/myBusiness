@@ -21,7 +21,14 @@ class IngresosViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) 
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // Función para apuntar un nuevo dinero que ha entrado
-    fun apuntarNuevoIngreso(concepto: String, cantidad: Double, fecha: Long, categoria: String, esFijo: Boolean = false) {
+    fun apuntarNuevoIngreso(
+        concepto: String, 
+        cantidad: Double, 
+        fecha: Long, 
+        categoria: String, 
+        esFijo: Boolean = false,
+        clienteId: Int? = null
+    ) {
         viewModelScope.launch {
             repositorio.insertarIngreso(
                 Ingreso(
@@ -29,7 +36,8 @@ class IngresosViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) 
                     cantidad = cantidad,
                     fecha = fecha,
                     categoria = categoria,
-                    esFijo = esFijo
+                    esFijo = esFijo,
+                    clienteId = clienteId
                 )
             )
         }

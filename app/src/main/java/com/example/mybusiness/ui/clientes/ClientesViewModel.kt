@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mybusiness.data.BusinessRepository
 import com.example.mybusiness.data.Cliente
+import com.example.mybusiness.data.ClienteConTotal
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -18,6 +19,10 @@ class ClientesViewModel(application: Application) : AndroidViewModel(application
 
     // Aquí guardamos la lista de todos los clientes para que la pantalla la vea
     val clientes: StateFlow<List<Cliente>> = repository.todosLosClientes
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Nueva lista que incluye cuánto dinero ha gastado cada cliente en total
+    val clientesConTotal: StateFlow<List<ClienteConTotal>> = repository.todosLosClientesConTotal
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // Función para guardar un nuevo cliente en la base de datos

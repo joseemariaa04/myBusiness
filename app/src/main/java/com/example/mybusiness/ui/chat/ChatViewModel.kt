@@ -49,7 +49,7 @@ class ChatViewModel : ViewModel() {
     }
 
     // Esta función se activa cuando pulsamos el botón de enviar
-    fun enviarMensaje(textoDelUsuario: String, contextoNegocio: String = "", promptSistema: String = "Eres el asistente inteligente de myBusiness. Ayuda con contabilidad y gestión de forma breve.") {
+    fun enviarMensaje(textoDelUsuario: String, contextoNegocio: String = "", promptSistema: String = "Eres Buzzy, el asistente inteligente de myBusiness. Ayuda con contabilidad y gestión de forma breve.") {
         // Si no han escrito nada o ya estamos esperando respuesta, no hacemos nada
         if (textoDelUsuario.isBlank() || _estaCargando.value) return
 

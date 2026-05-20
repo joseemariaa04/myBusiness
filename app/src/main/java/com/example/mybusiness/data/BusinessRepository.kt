@@ -28,6 +28,8 @@ class BusinessRepository private constructor(context: Context) {
     // --- CLIENTES ---
     // Nos da la lista de clientes completa
     val todosLosClientes: Flow<List<Cliente>> = clienteDao.obtenerTodos()
+    // Saca a los clientes junto con el dinero total que nos han dado, ideal para el manual.
+    val todosLosClientesConTotal: Flow<List<ClienteConTotal>> = clienteDao.obtenerClientesConTotal()
     suspend fun insertarCliente(cliente: Cliente) = clienteDao.insertar(cliente)
     suspend fun eliminarCliente(cliente: Cliente) = clienteDao.eliminar(cliente)
 

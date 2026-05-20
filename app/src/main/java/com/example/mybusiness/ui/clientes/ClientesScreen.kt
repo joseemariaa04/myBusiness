@@ -31,14 +31,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.mybusiness.R
 import com.example.mybusiness.data.Cliente
+import com.example.mybusiness.data.ClienteConTotal
 import com.example.mybusiness.ui.AnimacionEntradaLista
 import com.example.mybusiness.ui.EstadoVacio
 
 // Esta pantalla sirve para gestionar nuestra lista de clientes y sus datos de contacto
 @Composable
 fun ClientesScreen(controladorClientes: ClientesViewModel) {
-    // Obtenemos la lista de clientes que el controlador tiene guardada
-    val clientes by controladorClientes.clientes.collectAsState()
+    // Obtenemos la lista de clientes con sus totales que el controlador tiene guardada
+    val clientesConTotal by controladorClientes.clientesConTotal.collectAsState()
     
     // Estados para controlar si se ve el formulario de añadir o el de borrar
     var mostrarDialogo by remember { mutableStateOf(false) }
@@ -46,8 +47,8 @@ fun ClientesScreen(controladorClientes: ClientesViewModel) {
     var textoBusqueda by remember { mutableStateOf("") }
 
     // Filtramos los clientes por nombre o empresa según lo que escribamos en el buscador
-    val clientesFiltrados = clientes.filter {
-        it.nombre.contains(textoBusqueda, ignoreCase = true) || it.empresa.contains(textoBusqueda, ignoreCase = true)
+    val clientesFiltrados = clientesConTotal.filter {
+        it.cliente.nombre.contains(textoBusqueda, ignoreCase = true) || it.cliente.empresa.contains(textoBusqueda, ignoreCase = true)
     }
 
     Scaffold(
@@ -105,11 +106,12 @@ fun ClientesScreen(controladorClientes: ClientesViewModel) {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    itemsIndexed(clientesFiltrados) { indice, cliente ->
+                    itemsIndexed(clientesFiltrados) { indice, item ->
                         AnimacionEntradaLista(indice = indice) {
                             ClienteCard(
-                                cliente = cliente,
-                                onDelete = { clienteAEliminar = cliente }
+                                cliente = item.cliente,
+                                totalGastado = item.totalGastado,
+                                onDelete = { clienteAEliminar = item.cliente }
                             )
                         }
                     }
@@ -157,7 +159,7 @@ fun ClientesScreen(controladorClientes: ClientesViewModel) {
 
 // Así es como se ve la tarjeta de cada cliente en la lista
 @Composable
-fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
+fun ClienteCard(cliente: Cliente, totalGastado: Double, onDelete: () -> Unit) {
     val context = LocalContext.current
 
     Card(
@@ -191,6 +193,14 @@ fun ClienteCard(cliente: Cliente, onDelete: () -> Unit) {
                         text = cliente.nombre,
                         fontSize = 14.sp,
                         color = Color.Gray
+                    )
+                    // Enseñamos el total de dinero que este cliente nos ha pagado desde siempre
+                    Text(
+                        text = "Total pagado: ${String.format("%.2f", totalGastado)}€",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
                 // Botón para llamar por teléfono
