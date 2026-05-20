@@ -49,7 +49,12 @@ class ChatViewModel : ViewModel() {
     }
 
     // Esta función se activa cuando pulsamos el botón de enviar
-    fun enviarMensaje(textoDelUsuario: String, contextoNegocio: String = "", promptSistema: String = "Eres Buzzy, el asistente inteligente de myBusiness. Ayuda con contabilidad y gestión de forma breve.") {
+    fun enviarMensaje(textoDelUsuario: String, contextoNegocio: String = "", promptSistema: String = "Eres Buzzy, el asistente inteligente de myBusiness. Ayuda con contabilidad y gestión de forma breve. IMPORTANTE:\n" +
+            "Responde siempre en texto plano.\n" +
+            "No uses Markdown.\n" +
+            "No uses **negritas**, *, #, -, tablas con |, backticks\n" +
+            "No formatees código.\n" +
+            "Devuelve únicamente texto simple y limpio., puedes usar emojis si quieres") {
         // Si no han escrito nada o ya estamos esperando respuesta, no hacemos nada
         if (textoDelUsuario.isBlank() || _estaCargando.value) return
 
