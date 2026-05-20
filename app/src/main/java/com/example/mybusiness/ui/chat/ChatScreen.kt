@@ -44,12 +44,12 @@ fun ChatScreen(
     val estadoDeLaLista = rememberLazyListState()
 
     // Preparamos el "chuletero" para la IA con los datos de nuestra empresa
-    val contextCompany = stringResource(R.string.ai_context_company)
-    val contextDescription = stringResource(R.string.ai_context_description)
-    val contextData = stringResource(R.string.ai_context_current_month_data)
-    val labelIncome = stringResource(R.string.income)
-    val labelExpenses = stringResource(R.string.expenses)
-    val labelProfit = stringResource(R.string.current_monthly_profit)
+    val contextCompany = stringResource(R.string.ia_contexto_empresa)
+    val contextDescription = stringResource(R.string.ia_contexto_descripcion)
+    val contextData = stringResource(R.string.ia_contexto_datos_actuales)
+    val labelIncome = stringResource(R.string.ingresos)
+    val labelExpenses = stringResource(R.string.gastos)
+    val labelProfit = stringResource(R.string.beneficio_mensual_actual)
 
     val informacionDeLaEmpresa = remember(estadoDelNegocio, controladorDePreferencias.descripcionEmpresa) {
         """
@@ -110,7 +110,7 @@ fun ChatScreen(
                 value = textoEscritoPorElUsuario,
                 onValueChange = { textoEscritoPorElUsuario = it },
                 modifier = Modifier.weight(1f),
-                placeholder = { Text(stringResource(R.string.chat_placeholder)) },
+                placeholder = { Text(stringResource(R.string.chat_ayuda)) },
                 shape = RoundedCornerShape(24.dp),
                 maxLines = 3
             )
@@ -130,7 +130,7 @@ fun ChatScreen(
                     contentColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.send_message))
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.enviar_mensaje))
             }
         }
     }

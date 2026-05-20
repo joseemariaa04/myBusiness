@@ -89,7 +89,7 @@ class InicioViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) {
                     // Apuntamos que ya hemos cerrado este mes para no volver a hacerlo hasta el que viene
                     cajitaDePreferencias.edit().putString("ultimo_mes_cerrado", mesActualTexto).apply()
                     // Avisamos al usuario con un mensajito
-                    _eventosDeAviso.emit(getApplication<Application>().getString(R.string.month_closed_success, nombreDelMesViejo))
+                    _eventosDeAviso.emit(getApplication<Application>().getString(R.string.mes_cerrado_exito, nombreDelMesViejo))
                 }
             } finally {
                 estaCerrandoElMesActualmente = false
@@ -134,7 +134,7 @@ class InicioViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) {
         
         // No nos olvidamos de meter los sueldos en el desglose de gastos
         if (totalSueldosActivos > 0.0) {
-            val palabraSueldos = getApplication<Application>().getString(R.string.salario)
+            val palabraSueldos = getApplication<Application>().getString(R.string.salario_mensual)
             mapaGastosCategoriasTemporal[palabraSueldos] = (mapaGastosCategoriasTemporal[palabraSueldos] ?: 0.0) + totalSueldosActivos
         }
         val mapaGastosFinal = mapaGastosCategoriasTemporal.filter { it.value > 0.0 }

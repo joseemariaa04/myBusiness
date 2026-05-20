@@ -70,7 +70,7 @@ fun IngresosScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_income_desc))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.agregar_ingreso_desc))
             }
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -82,7 +82,7 @@ fun IngresosScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = stringResource(R.string.recent_income),
+                text = stringResource(R.string.ingresos_recientes),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -92,8 +92,8 @@ fun IngresosScreen(
             // Si no hay ingresos, enseñamos un dibujo y un texto de "Está vacío"
             if (listaActualIngresos.isEmpty()) {
                 EstadoVacio(
-                    mensaje = stringResource(R.string.no_income),
-                    subMensaje = stringResource(R.string.register_first_income),
+                    mensaje = stringResource(R.string.sin_ingresos),
+                    subMensaje = stringResource(R.string.registrar_primer_ingreso),
                     icono = Icons.AutoMirrored.Filled.TrendingUp
                 )
             } else {
@@ -135,8 +135,8 @@ fun IngresosScreen(
         if (ingresoABorrar != null) {
             AlertDialog(
                 onDismissRequest = { ingresoABorrar = null },
-                title = { Text(stringResource(R.string.delete_confirm_title)) },
-                text = { Text(stringResource(R.string.delete_income_confirm_desc, ingresoABorrar?.concepto ?: "")) },
+                title = { Text(stringResource(R.string.confirmar_eliminacion_titulo)) },
+                text = { Text(stringResource(R.string.confirmar_eliminacion_ingreso_desc, ingresoABorrar?.concepto ?: "")) },
                 confirmButton = {
                     Button(
                         onClick = {
@@ -145,12 +145,12 @@ fun IngresosScreen(
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Text(stringResource(R.string.delete))
+                        Text(stringResource(R.string.eliminar))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { ingresoABorrar = null }) {
-                        Text(stringResource(R.string.cancel))
+                        Text(stringResource(R.string.cancelar))
                     }
                 }
             )
@@ -204,7 +204,7 @@ fun TarjetaDeIngreso(
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             Icons.Default.PushPin,
-                            contentDescription = stringResource(R.string.fixed),
+                            contentDescription = stringResource(R.string.fijo),
                             modifier = Modifier.size(12.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -242,7 +242,7 @@ fun TarjetaDeIngreso(
             }
             // Botón de la papelera para borrar
             IconButton(onClick = alBorrar) {
-                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Gray)
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.eliminar), tint = Color.Gray)
             }
         }
     }
@@ -266,19 +266,19 @@ fun DialogoParaAñadirIngreso(
 
     AlertDialog(
         onDismissRequest = alCerrar,
-        title = { Text(stringResource(R.string.new_income_entry)) },
+        title = { Text(stringResource(R.string.nueva_entrada_ingreso)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 // Hueco para escribir el nombre (ej. "Venta de pan")
-                OutlinedTextField(value = queEs, onValueChange = { queEs = it }, label = { Text(stringResource(R.string.concept)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = queEs, onValueChange = { queEs = it }, label = { Text(stringResource(R.string.concepto)) }, modifier = Modifier.fillMaxWidth())
                 // Hueco para escribir el dinero
                 OutlinedTextField(
                     value = cuantoDinero,
                     onValueChange = { cuantoDinero = it },
-                    label = { Text(stringResource(R.string.salary)) },
+                    label = { Text(stringResource(R.string.cantidad)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
@@ -310,7 +310,7 @@ fun DialogoParaAñadirIngreso(
                     }
                 }
 
-                Text(stringResource(R.string.select_category), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.seleccionar_categoria), fontWeight = FontWeight.Bold)
                 // Lista de burbujas para elegir la categoría
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(listaDeCategorias) { cat ->
@@ -334,7 +334,7 @@ fun DialogoParaAñadirIngreso(
                 // Casilla para marcar si el dinero entra todos los meses
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = seRepiteSiempre, onCheckedChange = { seRepiteSiempre = it })
-                    Text(stringResource(R.string.fixed_income))
+                    Text(stringResource(R.string.ingreso_fijo))
                 }
             }
         },
@@ -343,19 +343,19 @@ fun DialogoParaAñadirIngreso(
                 val numeroDinero = cuantoDinero.toDoubleOrNull()
                 // Comprobamos que hayan escrito todo bien antes de guardar
                 if (queEs.isBlank() || cuantoDinero.isBlank()) {
-                    Toast.makeText(aviso, aviso.getString(R.string.all_fields_required), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(aviso, aviso.getString(R.string.campos_obligatorios), Toast.LENGTH_SHORT).show()
                 } else if (numeroDinero == null) {
-                    Toast.makeText(aviso, aviso.getString(R.string.invalid_amount), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(aviso, aviso.getString(R.string.cantidad_invalida), Toast.LENGTH_SHORT).show()
                 } else {
                     alGuardar(queEs, numeroDinero, queCategoria, seRepiteSiempre, idClienteSeleccionado)
                 }
             }) {
-                Text(stringResource(R.string.add))
+                Text(stringResource(R.string.agregar))
             }
         },
         dismissButton = {
             TextButton(onClick = alCerrar) {
-                Text(stringResource(R.string.cancel))
+                Text(stringResource(R.string.cancelar))
             }
         }
     )

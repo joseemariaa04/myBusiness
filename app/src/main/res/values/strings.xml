@@ -1,128 +1,128 @@
 <resources>
     <string name="app_name">myBusiness</string>
 
-    <!-- Navigation -->
-    <string name="nav_home">Home</string>
-    <string name="nav_staff">Staff</string>
-    <string name="nav_clients">Clients</string>
-    <string name="nav_expenses">Expense</string>
-    <string name="nav_income">Income</string>
+    <!-- Navegación -->
+    <string name="nav_inicio">Home</string>
+    <string name="nav_personal">Staff</string>
+    <string name="nav_clientes">Clients</string>
+    <string name="nav_gastos">Expense</string>
+    <string name="nav_ingresos">Income</string>
     <string name="nav_chat" translatable="false">Buzzy</string>
 
-    <!-- Home Screen -->
-    <string name="current_monthly_profit">Current Monthly Profit</string>
-    <string name="new_month">NEW MONTH</string>
-    <string name="categories">CATEGORIES</string>
-    <string name="history">HISTORY</string>
-    <string name="income">Income</string>
-    <string name="expenses">Expenses</string>
+    <!-- Pantalla de Inicio -->
+    <string name="beneficio_mensual_actual">Current Monthly Profit</string>
+    <string name="nuevo_mes">NEW MONTH</string>
+    <string name="categorias">CATEGORIES</string>
+    <string name="historial">HISTORY</string>
+    <string name="ingresos">Income</string>
+    <string name="gastos">Expenses</string>
 
-    <!-- Staff Screen -->
-    <string name="staff_title">Staff</string>
-    <string name="search_name">Search by name...</string>
-    <string name="no_staff">No staff found</string>
-    <string name="no_staff_sub">Start by adding your first employee by clicking the + button</string>
-    <string name="new_employee">New Employee</string>
-    <string name="name">Name</string>
-    <string name="position">Position</string>
-    <string name="phone">Phone</string>
+    <!-- Pantalla de Personal -->
+    <string name="titulo_personal">Staff</string>
+    <string name="buscar_nombre">Search by name...</string>
+    <string name="sin_personal">No staff found</string>
+    <string name="sin_personal_sub">Start by adding your first employee by clicking the + button</string>
+    <string name="nuevo_empleado">New Employee</string>
+    <string name="nombre">Name</string>
+    <string name="puesto">Position</string>
+    <string name="telefono">Phone</string>
     <string name="email">Email</string>
-    <string name="add">Add</string>
-    <string name="cancel">Cancel</string>
-    <string name="all_fields_required">All fields are required</string>
+    <string name="agregar">Add</string>
+    <string name="cancelar">Cancel</string>
+    <string name="campos_obligatorios">All fields are required</string>
 
-    <!-- Clients Screen -->
-    <string name="clients_title">Clients</string>
-    <string name="search_clients">Search by name or company...</string>
-    <string name="no_clients">No clients found</string>
-    <string name="no_clients_sub">Start by adding your first client by clicking the + button</string>
-    <string name="new_client">New Client</string>
-    <string name="contact_name">Contact Name</string>
-    <string name="company">Company</string>
+    <!-- Pantalla de Clientes -->
+    <string name="titulo_clientes">Clients</string>
+    <string name="buscar_clientes">Search by name or company...</string>
+    <string name="sin_clientes">No clients found</string>
+    <string name="sin_clientes_sub">Start by adding your first client by clicking the + button</string>
+    <string name="nuevo_cliente">New Client</string>
+    <string name="nombre_contacto">Contact Name</string>
+    <string name="empresa">Company</string>
 
-    <!-- Expenses/Income Screens -->
-    <string name="recent_expenses">Recent Expenses</string>
-    <string name="recent_income">Recent Income</string>
-    <string name="no_expenses">No expenses</string>
-    <string name="no_income">No income</string>
-    <string name="register_first_expense">Register your first expense by clicking the + button</string>
-    <string name="register_first_income">Register your first income by clicking the + button</string>
-    <string name="new_expense">New Expense</string>
-    <string name="new_income_entry">New Income</string>
-    <string name="concept">Concept</string>
-    <string name="salary">Amount</string>
-    <string name="select_category">Select Category:</string>
-    <string name="fixed_expense">Fixed Expense (Not deleted when changing month)</string>
-    <string name="fixed_income">Fixed Income (Not deleted when changing month)</string>
-    <string name="fixed">Fixed</string>
-    <string name="delete">Delete</string>
-    <string name="delete_confirm_title">Confirm Deletion</string>
-    <string name="delete_worker_confirm_desc">Are you sure you want to delete worker %1$s? This action cannot be undone.</string>
-    <string name="delete_client_confirm_desc">Are you sure you want to delete client %1$s? This action cannot be undone.</string>
-    <string name="delete_expense_confirm_desc">Are you sure you want to delete the expense \'%1$s\'? This action cannot be undone.</string>
-    <string name="delete_income_confirm_desc">Are you sure you want to delete the income \'%1$s\'? This action cannot be undone.</string>
-    <string name="delete_category_confirm_desc">Are you sure you want to delete the category \'%1$s\'? This action cannot be undone.</string>
-    <string name="add_expense_desc">Add Expense</string>
-    <string name="add_income_desc">Add Income</string>
-    <string name="salario">Monthly Salary</string>
-    <string name="active">Active</string>
-    <string name="inactive">Inactive</string>
-    <string name="active_worker">Active Worker</string>
-    <string name="call">Call</string>
-    <string name="send_email">Send Email</string>
-    <string name="fill_all_fields">Please fill all fields correctly</string>
-    <string name="add_worker_desc">Add Worker</string>
-    <string name="add_client_desc">Add Client</string>
-    <string name="invalid_email">The email format is invalid</string>
-    <string name="invalid_phone">The phone number must have at least 9 digits</string>
-    <string name="back">Back</string>
-    <string name="settings">Settings</string>
-    <string name="company_name">Company Name</string>
-    <string name="company_description">What does your company do? (Context for AI)</string>
-    <string name="currency_symbol">Currency Symbol:</string>
-    <string name="app_theme">App Theme:</string>
-    <string name="light">Light</string>
-    <string name="dark">Dark</string>
-    <string name="system">System</string>
-    <string name="auto_month_closure">Auto Month Closure</string>
-    <string name="auto_month_closure_desc">Close month automatically on the 1st</string>
-    <string name="auto_month_closure_info">Month closure is automatic on the first day of each month.</string>
-    <string name="no_history_data">No historical data available for the chart yet</string>
-    <string name="annual_performance">Annual Performance</string>
-    <string name="save">Save</string>
-    <string name="close">Close</string>
-    <string name="invalid_amount">The amount must be a valid number</string>
+    <!-- Pantallas de Gastos/Ingresos -->
+    <string name="gastos_recientes">Recent Expenses</string>
+    <string name="ingresos_recientes">Recent Income</string>
+    <string name="sin_gastos">No expenses</string>
+    <string name="sin_ingresos">No income</string>
+    <string name="registrar_primer_gasto">Register your first expense by clicking the + button</string>
+    <string name="registrar_primer_ingreso">Register your first income by clicking the + button</string>
+    <string name="nuevo_gasto">New Expense</string>
+    <string name="nueva_entrada_ingreso">New Income</string>
+    <string name="concepto">Concept</string>
+    <string name="cantidad">Amount</string>
+    <string name="seleccionar_categoria">Select Category:</string>
+    <string name="gasto_fijo">Fixed Expense (Not deleted when changing month)</string>
+    <string name="ingreso_fijo">Fixed Income (Not deleted when changing month)</string>
+    <string name="fijo">Fixed</string>
+    <string name="eliminar">Delete</string>
+    <string name="confirmar_eliminacion_titulo">Confirm Deletion</string>
+    <string name="confirmar_eliminacion_trabajador_desc">Are you sure you want to delete worker %1$s? This action cannot be undone.</string>
+    <string name="confirmar_eliminacion_cliente_desc">Are you sure you want to delete client %1$s? This action cannot be undone.</string>
+    <string name="confirmar_eliminacion_gasto_desc">Are you sure you want to delete the expense \'%1$s\'? This action cannot be undone.</string>
+    <string name="confirmar_eliminacion_ingreso_desc">Are you sure you want to delete the income \'%1$s\'? This action cannot be undone.</string>
+    <string name="confirmar_eliminacion_categoria_desc">Are you sure you want to delete the category \'%1$s\'? This action cannot be undone.</string>
+    <string name="agregar_gasto_desc">Add Expense</string>
+    <string name="agregar_ingreso_desc">Add Income</string>
+    <string name="salario_mensual">Monthly Salary</string>
+    <string name="activo">Active</string>
+    <string name="inactivo">Inactive</string>
+    <string name="trabajador_activo">Active Worker</string>
+    <string name="llamar">Call</string>
+    <string name="enviar_email">Send Email</string>
+    <string name="rellenar_todos_campos">Please fill all fields correctly</string>
+    <string name="agregar_trabajador_desc">Add Worker</string>
+    <string name="agregar_cliente_desc">Add Client</string>
+    <string name="email_invalido">The email format is invalid</string>
+    <string name="telefono_invalido">The phone number must have at least 9 digits</string>
+    <string name="volver">Back</string>
+    <string name="ajustes">Settings</string>
+    <string name="nombre_empresa">Company Name</string>
+    <string name="descripcion_empresa">What does your company do? (Context for AI)</string>
+    <string name="simbolo_moneda">Currency Symbol:</string>
+    <string name="tema_app">App Theme:</string>
+    <string name="claro">Light</string>
+    <string name="oscuro">Dark</string>
+    <string name="sistema">System</string>
+    <string name="cierre_mes_automatico">Auto Month Closure</string>
+    <string name="cierre_mes_automatico_desc">Close month automatically on the 1st</string>
+    <string name="cierre_mes_automatico_info">Month closure is automatic on the first day of each month.</string>
+    <string name="sin_datos_historial">No historical data available for the chart yet</string>
+    <string name="rendimiento_anual">Annual Performance</string>
+    <string name="guardar">Save</string>
+    <string name="cerrar">Close</string>
+    <string name="cantidad_invalida">The amount must be a valid number</string>
 
-    <!-- Month Closure -->
-    <string name="close_month_title">Close Current Month</string>
-    <string name="close_month_desc">Closing the month will move the current information to the history and start a new period.</string>
-    <string name="month_name_label">Month Name</string>
-    <string name="confirm_restart">Confirm and Restart</string>
-    <string name="month_name_required">Month name is required</string>
-    <string name="month_closed_success">Month \'%1$s\' closed successfully and saved in history</string>
-    <string name="month_close_error">Error closing month: %1$s</string>
+    <!-- Cierre de Mes -->
+    <string name="cerrar_mes_titulo">Close Current Month</string>
+    <string name="cerrar_mes_desc">Closing the month will move the current information to the history and start a new period.</string>
+    <string name="nombre_mes_etiqueta">Month Name</string>
+    <string name="confirmar_reiniciar">Confirm and Restart</string>
+    <string name="nombre_mes_obligatorio">Month name is required</string>
+    <string name="mes_cerrado_exito">Month \'%1$s\' closed successfully and saved in history</string>
+    <string name="error_cerrar_mes">Error closing month: %1$s</string>
 
-    <!-- Categories Management -->
-    <string name="manage_categories">Manage Categories</string>
-    <string name="new_category">New Category:</string>
-    <string name="choose_icon">Choose an icon:</string>
-    <string name="save_new">Save New</string>
-    <string name="saved_categories">Saved Categories:</string>
-    <string name="category_name_required">Enter a name for the category</string>
-    <string name="category_added">Category added</string>
+    <!-- Gestión de Categorías -->
+    <string name="gestionar_categorias">Manage Categories</string>
+    <string name="nueva_categoria">New Category:</string>
+    <string name="elegir_icono">Choose an icon:</string>
+    <string name="guardar_nueva">Save New</string>
+    <string name="categorias_guardadas">Saved Categories:</string>
+    <string name="nombre_categoria_obligatorio">Enter a name for the category</string>
+    <string name="categoria_añadida">Category added</string>
 
-    <!-- Month Detail -->
-    <string name="month_detail_title">Detail: %1$s</string>
-    <string name="movements_summary">Movements Summary</string>
-    <string name="no_income_this_month">No income registered this month.</string>
-    <string name="no_expenses_this_month">No expenses registered this month.</string>
+    <!-- Detalle de Mes -->
+    <string name="detalle_mes_titulo">Detail: %1$s</string>
+    <string name="resumen_movimientos">Movements Summary</string>
+    <string name="sin_ingresos_este_mes">No income registered this month.</string>
+    <string name="sin_gastos_este_mes">No expenses registered this month.</string>
 
-    <!-- Chat Screen -->
+    <!-- Pantalla de Chat -->
     <string name="mensaje_IA">Hello! I\'m Buzzy, your myBusiness AI assistant. How can I help you today?</string>
-    <string name="chat_placeholder">Ask something about your business...</string>
-    <string name="send_message">Send message</string>
-    <string name="ai_context_company">Company</string>
-    <string name="ai_context_description">Description</string>
-    <string name="ai_context_current_month_data">Current month data:</string>
-    <string name="ai_system_prompt">You are the intelligent assistant of myBusiness. Help with accounting and management briefly. Respond in the language the user asks. Current context: %1$s</string>
+    <string name="chat_ayuda">Ask something about your business...</string>
+    <string name="enviar_mensaje">Send message</string>
+    <string name="ia_contexto_empresa">Company</string>
+    <string name="ia_contexto_descripcion">Description</string>
+    <string name="ia_contexto_datos_actuales">Current month data:</string>
+    <string name="ia_system_prompt">You are the intelligent assistant of myBusiness. Help with accounting and management briefly. Respond in the language the user asks. Current context: %1$s</string>
 </resources>

@@ -108,7 +108,7 @@ fun MainApp(prefViewModel: PreferenciasViewModel) {
                 },
                 actions = {
                     IconButton(onClick = { mostrarConfig = true }) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.ajustes))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -221,7 +221,7 @@ fun DialogoConfiguracion(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings)) },
+        title = { Text(stringResource(R.string.ajustes)) },
         text = {
             Column(
                 modifier = Modifier
@@ -232,19 +232,19 @@ fun DialogoConfiguracion(
                 OutlinedTextField(
                     value = nombreTmp,
                     onValueChange = { nombreTmp = it },
-                    label = { Text(stringResource(R.string.company_name)) },
+                    label = { Text(stringResource(R.string.nombre_empresa)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
                     value = descripcionTmp,
                     onValueChange = { descripcionTmp = it },
-                    label = { Text(stringResource(R.string.company_description)) },
+                    label = { Text(stringResource(R.string.descripcion_empresa)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3
                 )
                 
-                Text(stringResource(R.string.currency_symbol), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.simbolo_moneda), fontWeight = FontWeight.Bold)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(monedas) { simbolo ->
                         FilterChip(
@@ -255,7 +255,7 @@ fun DialogoConfiguracion(
                     }
                 }
 
-                Text(stringResource(R.string.app_theme), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.tema_app), fontWeight = FontWeight.Bold)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -263,24 +263,24 @@ fun DialogoConfiguracion(
                     FilterChip(
                         selected = modoOscuroTmp == false,
                         onClick = { modoOscuroTmp = false },
-                        label = { Text(stringResource(R.string.light)) }
+                        label = { Text(stringResource(R.string.claro)) }
                     )
                     FilterChip(
                         selected = modoOscuroTmp == true,
                         onClick = { modoOscuroTmp = true },
-                        label = { Text(stringResource(R.string.dark)) }
+                        label = { Text(stringResource(R.string.oscuro)) }
                     )
                     FilterChip(
                         selected = modoOscuroTmp == null,
                         onClick = { modoOscuroTmp = null },
-                        label = { Text(stringResource(R.string.system)) }
+                        label = { Text(stringResource(R.string.sistema)) }
                     )
                 }
 
                 HorizontalDivider()
 
                 Text(
-                    text = stringResource(R.string.auto_month_closure_info),
+                    text = stringResource(R.string.cierre_mes_automatico_info),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)
@@ -295,12 +295,12 @@ fun DialogoConfiguracion(
                 prefViewModel.guardarModoOscuro(modoOscuroTmp)
                 onDismiss()
             }) {
-                Text(stringResource(R.string.save))
+                Text(stringResource(R.string.guardar))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.close))
+                Text(stringResource(R.string.cerrar))
             }
         }
     )

@@ -61,7 +61,7 @@ fun TrabajadoresScreen(controladorTrabajadores: TrabajadoresViewModel) {
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_worker_desc))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.agregar_trabajador_desc))
             }
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -73,7 +73,7 @@ fun TrabajadoresScreen(controladorTrabajadores: TrabajadoresViewModel) {
                 .padding(16.dp)
         ) {
             Text(
-                text = stringResource(R.string.staff_title),
+                text = stringResource(R.string.titulo_personal),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -87,7 +87,7 @@ fun TrabajadoresScreen(controladorTrabajadores: TrabajadoresViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                placeholder = { Text(stringResource(R.string.search_name)) },
+                placeholder = { Text(stringResource(R.string.buscar_nombre)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -99,8 +99,8 @@ fun TrabajadoresScreen(controladorTrabajadores: TrabajadoresViewModel) {
             // Si no hay nadie que coincida con la búsqueda, enseñamos el aviso de "Vacío"
             if (trabajadoresFiltrados.isEmpty()) {
                 EstadoVacio(
-                    mensaje = stringResource(R.string.no_staff),
-                    subMensaje = stringResource(R.string.no_staff_sub),
+                    mensaje = stringResource(R.string.sin_personal),
+                    subMensaje = stringResource(R.string.sin_personal_sub),
                     icono = Icons.Default.Group
                 )
             } else {
@@ -128,8 +128,8 @@ fun TrabajadoresScreen(controladorTrabajadores: TrabajadoresViewModel) {
         if (empleadoABorrar != null) {
             AlertDialog(
                 onDismissRequest = { empleadoABorrar = null },
-                title = { Text(stringResource(R.string.delete_confirm_title)) },
-                text = { Text(stringResource(R.string.delete_worker_confirm_desc, empleadoABorrar?.nombre ?: "")) },
+                title = { Text(stringResource(R.string.confirmar_eliminacion_titulo)) },
+                text = { Text(stringResource(R.string.confirmar_eliminacion_trabajador_desc, empleadoABorrar?.nombre ?: "")) },
                 confirmButton = {
                     Button(
                         onClick = {
@@ -138,12 +138,12 @@ fun TrabajadoresScreen(controladorTrabajadores: TrabajadoresViewModel) {
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Text(stringResource(R.string.delete))
+                        Text(stringResource(R.string.eliminar))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { empleadoABorrar = null }) {
-                        Text(stringResource(R.string.cancel))
+                        Text(stringResource(R.string.cancelar))
                     }
                 }
             )
@@ -206,7 +206,7 @@ fun TarjetaDeEmpleado(empleado: Trabajador, alCambiarEstado: () -> Unit, alBorra
                         modifier = Modifier.padding(vertical = 4.dp)
                     ) {
                         Text(
-                            text = if (empleado.activo) stringResource(R.string.active) else stringResource(R.string.inactive),
+                            text = if (empleado.activo) stringResource(R.string.activo) else stringResource(R.string.inactivo),
                             color = colorEstado,
                             fontSize = 10.sp,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
@@ -215,7 +215,7 @@ fun TarjetaDeEmpleado(empleado: Trabajador, alCambiarEstado: () -> Unit, alBorra
                     }
 
                     Text(
-                        text = "${empleado.puesto} • ${stringResource(R.string.salary)}: ${empleado.salario}",
+                        text = "${empleado.puesto} • ${stringResource(R.string.salario_mensual)}: ${empleado.salario}",
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
@@ -227,7 +227,7 @@ fun TarjetaDeEmpleado(empleado: Trabajador, alCambiarEstado: () -> Unit, alBorra
                     }
                     contexto.startActivity(intencion)
                 }) {
-                    Icon(Icons.Default.Phone, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.Default.Phone, contentDescription = stringResource(R.string.llamar), tint = MaterialTheme.colorScheme.primary)
                 }
                 // Botón para mandar un email
                 IconButton(onClick = {
@@ -236,11 +236,11 @@ fun TarjetaDeEmpleado(empleado: Trabajador, alCambiarEstado: () -> Unit, alBorra
                     }
                     contexto.startActivity(intencion)
                 }) {
-                    Icon(Icons.Default.Email, contentDescription = stringResource(R.string.send_email), tint = MaterialTheme.colorScheme.secondary)
+                    Icon(Icons.Default.Email, contentDescription = stringResource(R.string.enviar_email), tint = MaterialTheme.colorScheme.secondary)
                 }
                 // Botón para quitar al empleado de la lista
                 IconButton(onClick = alBorrar) {
-                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Gray)
+                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.eliminar), tint = Color.Gray)
                 }
             }
         }
@@ -260,18 +260,18 @@ fun DialogoParaContratar(alCerrar: () -> Unit, alGuardar: (String, String, Strin
 
     AlertDialog(
         onDismissRequest = alCerrar,
-        title = { Text(stringResource(R.string.new_employee)) },
+        title = { Text(stringResource(R.string.nuevo_empleado)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedTextField(value = queNombre, onValueChange = { queNombre = it }, label = { Text(stringResource(R.string.name)) }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = quePuesto, onValueChange = { quePuesto = it }, label = { Text(stringResource(R.string.position)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = queNombre, onValueChange = { queNombre = it }, label = { Text(stringResource(R.string.nombre)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = quePuesto, onValueChange = { quePuesto = it }, label = { Text(stringResource(R.string.puesto)) }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(
                     value = queTelefono,
                     onValueChange = { queTelefono = it },
-                    label = { Text(stringResource(R.string.phone)) },
+                    label = { Text(stringResource(R.string.telefono)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
                 )
@@ -279,13 +279,13 @@ fun DialogoParaContratar(alCerrar: () -> Unit, alGuardar: (String, String, Strin
                 OutlinedTextField(
                     value = queSalario,
                     onValueChange = { queSalario = it },
-                    label = { Text(stringResource(R.string.salario)) },
+                    label = { Text(stringResource(R.string.salario_mensual)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = estaTrabajandoYa, onCheckedChange = { estaTrabajandoYa = it })
-                    Text(stringResource(R.string.active_worker))
+                    Text(stringResource(R.string.trabajador_activo))
                 }
             }
         },
@@ -294,17 +294,17 @@ fun DialogoParaContratar(alCerrar: () -> Unit, alGuardar: (String, String, Strin
                 val sueldoNumero = queSalario.toDoubleOrNull()
                 // Comprobamos que no falte nada importante
                 if (queNombre.isBlank() || quePuesto.isBlank() || queTelefono.isBlank() || queEmail.isBlank() || sueldoNumero == null) {
-                    Toast.makeText(aviso, aviso.getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(aviso, aviso.getString(R.string.rellenar_todos_campos), Toast.LENGTH_SHORT).show()
                 } else {
                     alGuardar(queNombre, quePuesto, queTelefono, queEmail, sueldoNumero, estaTrabajandoYa)
                 }
             }) {
-                Text(stringResource(R.string.add))
+                Text(stringResource(R.string.agregar))
             }
         },
         dismissButton = {
             TextButton(onClick = alCerrar) {
-                Text(stringResource(R.string.cancel))
+                Text(stringResource(R.string.cancelar))
             }
         }
     )

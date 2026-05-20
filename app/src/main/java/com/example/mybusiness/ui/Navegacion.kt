@@ -16,11 +16,11 @@ import com.example.mybusiness.R
 // Aquí definimos todas las pantallas que tiene nuestra aplicación
 // Usamos una "sealed class" para que sea más fácil de manejar luego en el código
 sealed class Screen(val route: String, val titleRes: Int, val icon: ImageVector) {
-    object Inicio : Screen("inicio", R.string.nav_home, Icons.Default.Home)
-    object Trabajadores : Screen("trabajadores", R.string.nav_staff, Icons.Default.Group)
-    object Clientes : Screen("clientes", R.string.nav_clients, Icons.Default.BusinessCenter)
-    object Gastos : Screen("gastos", R.string.nav_expenses, Icons.Default.MoneyOff)
-    object Ingresos : Screen("ingresos", R.string.nav_income, Icons.Default.AttachMoney)
+    object Inicio : Screen("inicio", R.string.nav_inicio, Icons.Default.Home)
+    object Trabajadores : Screen("trabajadores", R.string.nav_personal, Icons.Default.Group)
+    object Clientes : Screen("clientes", R.string.nav_clientes, Icons.Default.BusinessCenter)
+    object Gastos : Screen("gastos", R.string.nav_gastos, Icons.Default.MoneyOff)
+    object Ingresos : Screen("ingresos", R.string.nav_ingresos, Icons.Default.AttachMoney)
     object Chat : Screen("chat", R.string.nav_chat, Icons.Default.AutoAwesome)
     // Esta pantalla es especial porque recibe el ID del mes y su nombre para enseñar los detalles
     object DetalleMes : Screen("detalle_mes/{mesId}/{nombreMes}", R.string.app_name, Icons.Default.Home)

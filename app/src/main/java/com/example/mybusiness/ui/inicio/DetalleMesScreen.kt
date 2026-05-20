@@ -38,11 +38,11 @@ fun DetalleMesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.month_detail_title, nombreMes)) },
+                title = { Text(stringResource(R.string.detalle_mes_titulo, nombreMes)) },
                 navigationIcon = {
                     // Botón para ir atrás y volver a la pantalla de inicio
                     IconButton(onClick = onVolver) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.volver))
                     }
                 }
             )
@@ -54,17 +54,17 @@ fun DetalleMesScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            Text(stringResource(R.string.movements_summary), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text(stringResource(R.string.resumen_movimientos), fontWeight = FontWeight.Bold, fontSize = 20.sp)
             Spacer(modifier = Modifier.height(16.dp))
 
             // Lista con todos los movimientos del mes
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 item {
-                    Text(stringResource(R.string.income), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.ingresos), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
                 }
                 // Si no hubo ingresos, avisamos
                 if (listaIngresos.isEmpty()) {
-                    item { Text(stringResource(R.string.no_income_this_month), fontSize = 14.sp, color = Color.Gray) }
+                    item { Text(stringResource(R.string.sin_ingresos_este_mes), fontSize = 14.sp, color = Color.Gray) }
                 } else {
                     // Pintamos cada ingreso
                     items(listaIngresos) { ingreso ->
@@ -80,11 +80,11 @@ fun DetalleMesScreen(
 
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(stringResource(R.string.expenses), fontWeight = FontWeight.SemiBold, color = Color(0xFFFF5252))
+                    Text(stringResource(R.string.gastos), fontWeight = FontWeight.SemiBold, color = Color(0xFFFF5252))
                 }
                 // Si no hubo gastos, avisamos
                 if (listaGastos.isEmpty()) {
-                    item { Text(stringResource(R.string.no_expenses_this_month), fontSize = 14.sp, color = Color.Gray) }
+                    item { Text(stringResource(R.string.sin_gastos_este_mes), fontSize = 14.sp, color = Color.Gray) }
                 } else {
                     // Pintamos cada gasto
                     items(listaGastos) { gasto ->

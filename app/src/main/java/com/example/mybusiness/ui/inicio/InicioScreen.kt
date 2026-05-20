@@ -136,7 +136,7 @@ fun InicioScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.current_monthly_profit),
+                            text = stringResource(R.string.beneficio_mensual_actual),
                             color = Color.Gray,
                             fontSize = 14.sp
                         )
@@ -186,8 +186,8 @@ fun InicioScreen(
         }
 
         item {
-            val tituloIngresos = stringResource(R.string.income)
-            val tituloGastos = stringResource(R.string.expenses)
+            val tituloIngresos = stringResource(R.string.ingresos)
+            val tituloGastos = stringResource(R.string.gastos)
             
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -230,14 +230,14 @@ fun InicioScreen(
             ) {
                 Icon(Icons.Default.Category, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.categories), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.categorias), fontWeight = FontWeight.Bold)
             }
         }
 
         item {
             Column {
                 Text(
-                    text = stringResource(R.string.annual_performance),
+                    text = stringResource(R.string.rendimiento_anual),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -250,7 +250,7 @@ fun InicioScreen(
 
         item {
             Text(
-                text = stringResource(R.string.history),
+                text = stringResource(R.string.historial),
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
@@ -300,7 +300,7 @@ fun InicioScreen(
             },
             confirmButton = {
                 TextButton(onClick = { desgloseATostrar = null }) {
-                    Text(stringResource(R.string.close))
+                    Text(stringResource(R.string.cerrar))
                 }
             }
         )
@@ -325,25 +325,25 @@ fun DialogoGestionCategorias(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.manage_categories)) },
+        title = { Text(stringResource(R.string.gestionar_categorias)) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.new_category), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.nueva_categoria), fontWeight = FontWeight.Bold)
                 TextField(
                     value = nombreCat,
                     onValueChange = { nombreCat = it },
-                    label = { Text(stringResource(R.string.name)) },
+                    label = { Text(stringResource(R.string.nombre)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(selected = tipoIngreso, onClick = { tipoIngreso = true })
-                    Text(stringResource(R.string.income))
+                    Text(stringResource(R.string.ingresos))
                     Spacer(modifier = Modifier.width(8.dp))
                     RadioButton(selected = !tipoIngreso, onClick = { tipoIngreso = false })
-                    Text(stringResource(R.string.expenses))
+                    Text(stringResource(R.string.gastos))
                 }
                 
-                Text(stringResource(R.string.choose_icon), modifier = Modifier.padding(top = 8.dp))
+                Text(stringResource(R.string.elegir_icono), modifier = Modifier.padding(top = 8.dp))
                 LazyRow(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -369,21 +369,21 @@ fun DialogoGestionCategorias(
                 Button(
                     onClick = {
                         if (nombreCat.isBlank()) {
-                            Toast.makeText(contexto, contexto.getString(R.string.category_name_required), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(contexto, contexto.getString(R.string.nombre_categoria_obligatorio), Toast.LENGTH_SHORT).show()
                         } else {
                             onAgregar(nombreCat, tipoIngreso, iconoSeleccionado)
                             nombreCat = ""
-                            Toast.makeText(contexto, contexto.getString(R.string.category_added), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(contexto, contexto.getString(R.string.categoria_añadida), Toast.LENGTH_SHORT).show()
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.save_new))
+                    Text(stringResource(R.string.guardar_nueva))
                 }
                 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                 
-                Text(stringResource(R.string.saved_categories), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.categorias_guardadas), fontWeight = FontWeight.Bold)
                 Box(modifier = Modifier.height(150.dp)) {
                     LazyColumn {
                         items(categorias) { cat ->
@@ -413,15 +413,15 @@ fun DialogoGestionCategorias(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancelar)) }
         }
     )
 
     if (categoriaABorrar != null) {
         AlertDialog(
             onDismissRequest = { categoriaABorrar = null },
-            title = { Text(stringResource(R.string.delete_confirm_title)) },
-            text = { Text(stringResource(R.string.delete_category_confirm_desc, categoriaABorrar?.nombre ?: "")) },
+            title = { Text(stringResource(R.string.confirmar_eliminacion_titulo)) },
+            text = { Text(stringResource(R.string.confirmar_eliminacion_categoria_desc, categoriaABorrar?.nombre ?: "")) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -430,12 +430,12 @@ fun DialogoGestionCategorias(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text(stringResource(R.string.delete))
+                    Text(stringResource(R.string.eliminar))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { categoriaABorrar = null }) {
-                    Text(stringResource(R.string.cancel))
+                    Text(stringResource(R.string.cancelar))
                 }
             }
         )
@@ -539,7 +539,7 @@ fun GraficaBeneficios(historial: List<HistorialMes>, prefViewModel: Preferencias
             shape = RoundedCornerShape(12.dp)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                Text(stringResource(R.string.no_history_data), color = Color.Gray, fontSize = 14.sp)
+                Text(stringResource(R.string.sin_datos_historial), color = Color.Gray, fontSize = 14.sp)
             }
         }
         return

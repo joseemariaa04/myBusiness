@@ -58,7 +58,7 @@ fun GastosScreen(controladorGastos: GastosViewModel, controladorPreferencias: Pr
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_expense_desc))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.agregar_gasto_desc))
             }
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -70,7 +70,7 @@ fun GastosScreen(controladorGastos: GastosViewModel, controladorPreferencias: Pr
                 .padding(16.dp)
         ) {
             Text(
-                text = stringResource(R.string.recent_expenses),
+                text = stringResource(R.string.gastos_recientes),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -80,8 +80,8 @@ fun GastosScreen(controladorGastos: GastosViewModel, controladorPreferencias: Pr
             // Si no hay gastos, enseñamos un dibujo y un texto de "No hay nada"
             if (listaActualGastos.isEmpty()) {
                 EstadoVacio(
-                    mensaje = stringResource(R.string.no_expenses),
-                    subMensaje = stringResource(R.string.register_first_expense),
+                    mensaje = stringResource(R.string.sin_gastos),
+                    subMensaje = stringResource(R.string.registrar_primer_gasto),
                     icono = Icons.Default.MoneyOff
                 )
             } else {
@@ -120,8 +120,8 @@ fun GastosScreen(controladorGastos: GastosViewModel, controladorPreferencias: Pr
         if (gastoABorrar != null) {
             AlertDialog(
                 onDismissRequest = { gastoABorrar = null },
-                title = { Text(stringResource(R.string.delete_confirm_title)) },
-                text = { Text(stringResource(R.string.delete_expense_confirm_desc, gastoABorrar?.concepto ?: "")) },
+                title = { Text(stringResource(R.string.confirmar_eliminacion_titulo)) },
+                text = { Text(stringResource(R.string.confirmar_eliminacion_gasto_desc, gastoABorrar?.concepto ?: "")) },
                 confirmButton = {
                     Button(
                         onClick = {
@@ -130,12 +130,12 @@ fun GastosScreen(controladorGastos: GastosViewModel, controladorPreferencias: Pr
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Text(stringResource(R.string.delete))
+                        Text(stringResource(R.string.eliminar))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { gastoABorrar = null }) {
-                        Text(stringResource(R.string.cancel))
+                        Text(stringResource(R.string.cancelar))
                     }
                 }
             )
@@ -188,7 +188,7 @@ fun TarjetaDeGasto(
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             Icons.Default.PushPin,
-                            contentDescription = stringResource(R.string.fixed),
+                            contentDescription = stringResource(R.string.fijo),
                             modifier = Modifier.size(12.dp),
                             tint = Color(0xFFFF5252)
                         )
@@ -217,7 +217,7 @@ fun TarjetaDeGasto(
             }
             // Botón para borrar el gasto
             IconButton(onClick = alBorrar) {
-                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Gray)
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.eliminar), tint = Color.Gray)
             }
         }
     }
@@ -238,24 +238,24 @@ fun DialogoParaAñadirGasto(
 
     AlertDialog(
         onDismissRequest = alCerrar,
-        title = { Text(stringResource(R.string.new_expense)) },
+        title = { Text(stringResource(R.string.nuevo_gasto)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 // Hueco para el nombre del gasto
-                OutlinedTextField(value = queEs, onValueChange = { queEs = it }, label = { Text(stringResource(R.string.concept)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = queEs, onValueChange = { queEs = it }, label = { Text(stringResource(R.string.concepto)) }, modifier = Modifier.fillMaxWidth())
                 // Hueco para el dinero
                 OutlinedTextField(
                     value = cuantoDinero,
                     onValueChange = { cuantoDinero = it },
-                    label = { Text(stringResource(R.string.salary)) },
+                    label = { Text(stringResource(R.string.cantidad)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
 
-                Text(stringResource(R.string.select_category), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.seleccionar_categoria), fontWeight = FontWeight.Bold)
                 // Lista de burbujas para elegir la categoría
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(listaDeCategorias) { cat ->
@@ -279,7 +279,7 @@ fun DialogoParaAñadirGasto(
                 // Casilla para marcar si el gasto es fijo (se repite todos los meses)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = seRepiteSiempre, onCheckedChange = { seRepiteSiempre = it })
-                    Text(stringResource(R.string.fixed_expense))
+                    Text(stringResource(R.string.gasto_fijo))
                 }
             }
         },
@@ -288,19 +288,19 @@ fun DialogoParaAñadirGasto(
                 val numeroDinero = cuantoDinero.toDoubleOrNull()
                 // Comprobamos que hayan escrito todo antes de guardar
                 if (queEs.isBlank() || cuantoDinero.isBlank()) {
-                    Toast.makeText(aviso, aviso.getString(R.string.all_fields_required), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(aviso, aviso.getString(R.string.campos_obligatorios), Toast.LENGTH_SHORT).show()
                 } else if (numeroDinero == null) {
-                    Toast.makeText(aviso, aviso.getString(R.string.invalid_amount), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(aviso, aviso.getString(R.string.cantidad_invalida), Toast.LENGTH_SHORT).show()
                 } else {
                     alGuardar(queEs, numeroDinero, queCategoria, seRepiteSiempre)
                 }
             }) {
-                Text(stringResource(R.string.add))
+                Text(stringResource(R.string.agregar))
             }
         },
         dismissButton = {
             TextButton(onClick = alCerrar) {
-                Text(stringResource(R.string.cancel))
+                Text(stringResource(R.string.cancelar))
             }
         }
     )
